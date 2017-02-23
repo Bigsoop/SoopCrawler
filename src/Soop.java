@@ -1,5 +1,4 @@
 import java.util.Date;
-import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,10 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
 import javax.security.sasl.AuthenticationException;
 
@@ -78,6 +74,7 @@ public class Soop {
 			addInterestingArticles(univKey,Constants.interestingLimit);
 			numberOfUnivs++;
 		}
+		db.setUpdate("흥미로운글 추가 작업");
 		return numberOfUnivs;
 
 	}
@@ -102,6 +99,7 @@ public class Soop {
 		}
 //		updateResultTable();
 //		outPutLog();
+		db.setUpdate("일반 작업");
 		db.closeConnection();
 		return numberOfUnivs;
 
@@ -129,6 +127,7 @@ public class Soop {
 		}
 //		updateResultTable();
 		db.closeConnection();
+		db.setUpdate("특정시간기준 일반 작업");
 		return numberOfUnivs;
 	}
 	
@@ -136,8 +135,8 @@ public class Soop {
 	/**
 	 * 해당 학교의 새로운 글을 일부 필수정보만 받아옵니다.<p>
 	 * 각 학교별 최근 업데이트 날짜 이후에 작성된 글의 id, 작성 일시를 받아와 DB에 저장합니다. 
-	 * @param univName
-	 * 		대상 학교명. <p>어느 학교의 글을 받아올지 설정합니다.
+	 * @param univKey
+	 * 		대상 학교번호. <p>어느 학교의 글을 받아올지 설정합니다.
 	 * <p>
 	 */	
 	private void getSimpleArticles(int univKey){
@@ -178,11 +177,11 @@ public class Soop {
 			}
 		}
 		
-		System.out.println("새 글 총" + numberOfFinished + "개 받아옴!");
+		System.out.println("새 글 총 " + numberOfFinished + "개 받아옴!");
 		System.out.println("받아온 자료를 DB에 전송하는중...");
 		db.writeSimpleInformations(articles); // 기본정보들을 DB에 저장.
 		db.setRecentUpdate(Constants.fm.format(new Date()),univKey);
-		System.out.println(Constants.univs[univKey].getName() + " 새 글 총" + numberOfFinished + "개 크롤링 완료!");
+		System.out.println(Constants.univs[univKey].getName() + " 새 글 총 " + numberOfFinished + "개 크롤링 완료!");
 		
 		System.out.println("새 글 DB전송 완료시각 : "+Constants.fm.format(new Date()));
 		System.out.println("------------------------------------------");
@@ -195,8 +194,8 @@ public class Soop {
 	 * 새롭게 학교 추가됐을때나 기타 상황 발생 시, 파라미터를 통해 수동으로 '직접 설정해준' 기준 일시 이후에 작성된 해당 학교의 글 id를 DB에 저장하는 메소드입니다. 
 	 * @param date
 	 * 		기준 일시.  어떤 일시 이후에 작성된 글만 받아올지 설정합니다.
-	 * @param univName
-	 * 		대상 학교. 어느 학교의 글을 받아올지 설정합니다.
+	 * @param univKey
+	 * 		대상 학교번호. 어느 학교의 글을 받아올지 설정합니다.
 	 * 
 	 */
 	private void getSimpleArticles(int univKey,String dateString){
@@ -232,11 +231,11 @@ public class Soop {
 				}
 			}
 		}
-		System.out.println("새 글 총" + numberOfFinished + "개 받아옴!");
+		System.out.println("새 글 총 " + numberOfFinished + "개 받아옴!");
 		System.out.println("받아온 자료를 DB에 전송하는중...");
 		db.writeSimpleInformations(articles); // 기본정보들을 DB에 저장.
 		db.setRecentUpdate(Constants.fm.format(new Date()),univKey);
-		System.out.println(Constants.univs[univKey].getName() + " 새 글 총" + numberOfFinished + "개 크롤링 완료!");		
+		System.out.println(Constants.univs[univKey].getName() + " 새 글 총 " + numberOfFinished + "개 크롤링 완료!");		
 				
 		
 		System.out.println("새 글 DB전송 완료시각 : "+Constants.fm.format(new Date()));
@@ -251,8 +250,8 @@ public class Soop {
 	/**
 	 * DB에 저장된 모든 게시글 중 지정한 학교에 해당하는 게시글의 좋아요, 댓글, 공유 횟수를 업데이트합니다.
 	 * <p>db에서 id만 빼와서 graph api돌려서 좋,댓,공 받아서 db에 update.
-	 * @param univName
-	 * 		대상 학교. 
+	 * @param univKey
+	 * 		대상 학교번호. 
 	 */
 	private void getInterestInformations(int univKey){	
 		ArrayList<Article> articles = new ArrayList<Article>();		
@@ -271,13 +270,12 @@ public class Soop {
 			obj =  fbClient.fetchObjects(subIds,
 					JsonObject.class,
 					Parameter.with("fields", "reactions.summary(true).limit(0),comments.limit(0).summary(true),shares.limit(0).summary(true)"));
-			//	파라미터 쓰는법 제대로 알자
 			}
 			catch(Exception e){
 				System.err.println("이상발생! 아마 망한페이지같다!");
 			}
 			for(String id: subIds){
-				try{ //@@ like말고 다른거도 받아와야지 화나요 멋져요 같은거
+				try{
 					int likes = obj.getJsonObject(id).getJsonObject("reactions").getJsonObject("summary").getInt("total_count"); //reaction emotion haha sad happy...
 					int comments = obj.getJsonObject(id).getJsonObject("comments").getJsonObject("summary").getInt("total_count");
 					int shares = 0;
@@ -312,7 +310,8 @@ public class Soop {
 	 * 방금받은 articles의 message필드를 채워주고
 	 * interestingArticles 테이블에 insert. 
 	 *  
-	 * @param UnivName
+	 * @param UnivKey
+	 * 		대상 학교번호.
 	 */
 	private void addInterestingArticles(int univKey,int limitNumber){
 		System.out.println("흥미로운 상위 "+limitNumber +"개의 데이터를 추려 받아오는중...");
@@ -437,3 +436,27 @@ public class Soop {
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -51,7 +51,7 @@ public class Jdbc {
 	 * 		최근 업데이트 일시를 String형태로 반환합니다.<p> 
 	 */
 	public String getRecentUpdate(int univKey){
-		String recentUpdate = Constants.defaultRecentUpdate;
+		String recentUpdate = null;
 		try {			
 			Class.forName("com.mysql.jdbc.Driver");
 			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);			
@@ -59,18 +59,14 @@ public class Jdbc {
 			java.sql.Statement st = null;
 			ResultSet rs = null;
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT MAX(time) FROM updates WHERE univKey="+univKey+";");
-			if (st.execute("SELECT MAX(time) FROM updates WHERE univKey="+univKey+";")) {
-				rs = st.getResultSet();
+			rs = st.executeQuery("SELECT time FROM recentUpdates WHERE univKey="+univKey+";");
+			if(rs.next()){ 
+				recentUpdate = rs.getString(1);				
 			}
-			while (rs.next()) {
-				recentUpdate = rs.getString(1);
+			else{
+				recentUpdate = Constants.defaultRecentUpdate;					
 			}
-			if (recentUpdate == null){
-				recentUpdate = Constants.defaultRecentUpdate;
-				
-			}
-		} catch (SQLException sqex) {
+		}catch (SQLException sqex) {
 			System.out.println("SQLException: " + sqex.getMessage());
 			System.out.println("SQLState: " + sqex.getSQLState());
 			
@@ -90,13 +86,15 @@ public class Jdbc {
 	 * 		대상 학교번호.
 	 */
 	public void setRecentUpdate(String dateString, int univKey){
-//		System.out.println("[[[["+Constants.fm.format(new Date()));
-		updateQuery("INSERT INTO updates(time,univKey) values('" + dateString + "',"+univKey+");");
-		
-//		getRecentUpdate();
+		if (getRecentUpdate(univKey).equals(Constants.defaultRecentUpdate))
+			updateQuery("INSERT INTO recentUpdates(time,univKey) values('" + dateString + "',"+univKey+");");
+		else
+			updateQuery("UPDATE recentUpdates SET time='"+dateString+"', univKey="+univKey+" WHERE univKey="+univKey+";");
 	}
 	
-	
+	public void setUpdate(String work){
+		updateQuery("INSERT INTO updates(time,work) values(NOW(),'"+work+"');");		
+	}
 	
 	/**
 	 * 새 글들의 간단한 정보를 DB에 저장합니다.<p>
@@ -135,11 +133,11 @@ public class Jdbc {
 			java.sql.Statement st = null;
 			ResultSet rs = null;
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT id FROM "+tableName+" WHERE univKey=" + univKey + ";");
-			if (st.execute("SELECT id FROM "+tableName+" WHERE univKey=" + univKey + ";")) {
-				rs = st.getResultSet();
-			}
-			while (rs.next()) {
+//			String 지금보다6개월전 = Constants.fm.format(new Date()) new Date());
+			rs = st.executeQuery("SELECT id FROM "+tableName+
+					" WHERE univKey=" + univKey + ";"); 
+//					" and unix_timestamp(created_time) > unix_timestamp('"+지금보다6개월전+"') ;"); 
+			while(rs.next()) {
 				list.add(rs.getString(1));
 			}
 		} catch (SQLException sqex) {
@@ -171,9 +169,6 @@ public class Jdbc {
 			ResultSet rs = null;
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT * FROM "+tableName+" WHERE univKey=" + univKey + ";");
-			if (st.execute("SELECT * FROM "+tableName+" WHERE univKey=" + univKey + ";")) {
-				rs = st.getResultSet();
-			}
 			while (rs.next()) {
 				Article article = new Article(
 						rs.getString("id"),
@@ -264,11 +259,8 @@ public class Jdbc {
 					+ " ORDER BY interesting DESC "
 					+ "LIMIT "+limitNumber
 					+ ";";
-					
-			rs = st.executeQuery(query);			
-			if (st.execute(query)) {
-				rs = st.getResultSet();
-			}
+							
+			rs = st.executeQuery(query);
 			while (rs.next()) {
 				Article article = new Article(
 						rs.getString("id"),
@@ -301,7 +293,6 @@ public class Jdbc {
 		for (Article article : articles){
 			String message = article.getMessage();
 			if (message!=null){
-//				message = " "+message+" ";
 				message = message.replaceAll("\'", "‘");//‘
 				message = message.replaceAll("\"", "\\‘‘");
 				

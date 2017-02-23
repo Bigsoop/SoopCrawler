@@ -1,11 +1,9 @@
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
 public final class Constants {
+	********* secret**************
 
-						********************
-						*** INFO SECRETS ***
-						********************
-						
+	
+	
 	public static final Univ[] univs={
 		new Univ("�ѱ��װ����б�","HangughangGongdaehaggyo"), 	// 0
 		new Univ("������б�", "SNUBamboo"), 				 	// 1
@@ -17,7 +15,6 @@ public final class Constants {
 		new Univ("�߾Ӵ��б�", "caubamboo"),
 		new Univ("������б�", "kyungheebamboo"),
 		new Univ("�ѱ��ܱ�����б�", "hufsbamboo"), 
-		new Univ("�ѱ��ܴ� �۷ι�ķ", "globalbamboo"),
 		new Univ("����ø����б�", "uosbamboo"),
 		new Univ("���Ǵ��б�", "sstt2015"),
 		new Univ("�泲���б�", "ChungNamNationalBamboo"),
@@ -60,11 +57,9 @@ public final class Constants {
 		new Univ("������б�","SeoKyeongUnivBamboo"),
 		new Univ("���δ��б�", "yonginbamboo"),
 		new Univ("��õ���б�", "SCNUbamboo"),
-		new Univ("��ϴ��б�", "KNUbamboo"),
 		new Univ("�Ѽ����б�", "hanseibamboo"),
 		new Univ("�������б�", "knubambooforest"),
 		new Univ("������б�", "SKUBAMBOO"),
-		new Univ("�ΰ���б�", "PKNUBamboo"),
 		new Univ("����ȸ���б�", "skhubamboo"),
 		new Univ("û�ִ��б�", "CJUbambooo"),
 		new Univ("�����б�", "ulsanbamboo"),
@@ -85,20 +80,20 @@ public final class Constants {
 		new Univ("���ƹ�ۿ������б�", "dongdeasup"),
 		new Univ("�ݿ��������б�", "daenamookumoh"),
 		new Univ("���α������б�", "ginuebamboo"),
-		new Univ("�������ڴ��б�", "1431832823796835"),//@
+		new Univ("�������ڴ��б�", "dongdukbamboo"),	
 		new Univ("�������б�", "euljibamboo"),
 		new Univ("���ϴ��б�", "KIUBABOO"),
 		new Univ("�ѱ����������б�", "kartsbamboo"),
 		new Univ("�������б�", "859759640748426"),//@
-		new Univ("ī�̽�Ʈ", "kaistbamboofp"),
-		new Univ("�������ڴ��б�", "dongdukbamboo"),
+		new Univ("ī�̽�Ʈ", "kaistbamboofp"),		
 		new Univ("�λ�ܱ�����б�", "BUFSbamboo"),
 		new Univ("�������б�", "dailysangji"),
 		new Univ("���￹�����б�", "realcommunicatedsia"),
-		new Univ("�������б�", "MJbamboo"),
 		new Univ("�Ѿ翩�ڴ��б�", "hywubamboo"),
-		new Univ("���Ǵ��б�", "420588408103211")//@
-			
+		new Univ("���Ǵ��б�", "420588408103211"),//@
+		new Univ("�ѱ��ܴ�۷ι�ķ�۽�", "globalbamboo"),
+		new Univ("��_�������б�", "MJbamboo"),
+		new Univ("��_�������ڴ��б�", "1431832823796835")//@
 	};
 
 	
