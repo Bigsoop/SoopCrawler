@@ -1,120 +1,109 @@
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-
 public final class Constants {
-	public static final String DBurl = "jdbc:mysql://localhost/soop";
-	public static final String DBid = "root";
-	public static final String DBpw = "autoset";
-	public static final String accessToken = "EAACEdEose0cBAMZACIjAieavoUYPq1XuLmH4fiaV65cd5wNkGAiyEEfAyDgZB5CYubRV2GhV2ITOKIK9UEf1Q6Clcp1FlnPLdAwXZBENC8qZCwnhTqLi5fZCUQC1JRyJpUEX66QjwC5XW8bT1L2xhIYb4Nfgls6OZAmURMyea4DuHcqZBIFTxxLTyGxtpV5r5sZD";
-	public static final String appId = "1196677553719613";
-	public static final String appSecret = "11f905b816f83e3342233d7b7c3055df";
-	public static final String defaultRecentUpdate = "2017-01-01 00:00:00";
-	public static final int interestingLimit = 7;
-	public static final int interestingMin = 60;
-	public static final SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//.0?
+
+						********************
+						*** INFO SECRETS ***
+						********************
+						
+	public static final Univ[] univs={
+		new Univ("ï¿½Ñ±ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½Ð±ï¿½","HangughangGongdaehaggyo"), 	// 0
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "SNUBamboo"), 				 	// 1
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "yonseibamboo"),				 	// 2 ...
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "koreabamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "sogangbamboo"),
+		new Univ("ï¿½ï¿½ï¿½Õ°ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "SKKUBamboo"),
+		new Univ("ï¿½Ñ¾ï¿½ï¿½ï¿½Ð±ï¿½", "hyubamboo"),
+		new Univ("ï¿½ß¾Ó´ï¿½ï¿½Ð±ï¿½", "caubamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "kyungheebamboo"),
+		new Univ("ï¿½Ñ±ï¿½ï¿½Ü±ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "hufsbamboo"), 
+		new Univ("ï¿½Ñ±ï¿½ï¿½Ü´ï¿½ ï¿½Û·Î¹ï¿½Ä·", "globalbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "uosbamboo"),
+		new Univ("ï¿½ï¿½ï¿½Ç´ï¿½ï¿½Ð±ï¿½", "sstt2015"),
+		new Univ("ï¿½æ³²ï¿½ï¿½ï¿½Ð±ï¿½", "ChungNamNationalBamboo"),
+		new Univ("ï¿½ï¿½ï¿½Ö´ï¿½ï¿½Ð±ï¿½", "ajoubamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "donggukbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "mjubamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "sejongbamboo"),
+		new Univ("ï¿½Ñ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "KnutBambooForest"),
+		new Univ("ï¿½ï¿½ï¿½ï¿©ï¿½Ú´ï¿½ï¿½Ð±ï¿½", "swubamboo"),		
+		new Univ("ï¿½ï¿½ï¿½Ï½ï¿½Æ®", "unibamboooo0"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "kwubamboo"),
+		new Univ("ï¿½Ü±ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "dkubamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "seoultechbamboo"),
+		new Univ("È«ï¿½Í´ï¿½ï¿½Ð±ï¿½", "hongikbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "smubb"),
+		new Univ("ï¿½ï¿½ï¿½Ï´ï¿½ï¿½Ð±ï¿½", "inhabamboo2"),
+		new Univ("ï¿½ï¿½Ï´ï¿½ï¿½Ð±ï¿½", "chungbuknubamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "donggukbamboo"),
+		new Univ("ï¿½ï¿½ï¿½Ï´ï¿½ï¿½Ð±ï¿½", "jbnusay"),
+		new Univ("ï¿½Ñ¾ï¿½ë¿¡ï¿½ï¿½Ä«", "ericadruwa"),
+		new Univ("ï¿½ï¿½Ãµï¿½ï¿½ï¿½Ð±ï¿½", "incheonbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï±³ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "snuebamboo"),
+		new Univ("ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "postechbamboo"),
+		new Univ("ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "schubamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½Ð±ï¿½", "bamboosmwu"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½Æ®", "GISTIT.ac.kr"),
+		new Univ("ï¿½ï¿½ï¿½ç¸¯ï¿½ï¿½ï¿½Ð±ï¿½", "CUKbby"),
+		new Univ("ï¿½ï¿½Ãµï¿½ï¿½ï¿½Ð±ï¿½", "gcubamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "kyonggibamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "gnubamboo1"), 
+		new Univ("ï¿½Ç±ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "konkukbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "yubamboo.net"),
+		new Univ("ï¿½ï¿½Ï´ï¿½ï¿½Ð±ï¿½", "KNUbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "MaeGuemI"),
+		new Univ("ï¿½ï¿½ï¿½Æ´ï¿½ï¿½Ð±ï¿½", "dongabamboo"),
+		new Univ("ï¿½Î°ï¿½ï¿½ï¿½Ð±ï¿½", "PKNUBamboo"),
+		new Univ("ï¿½ï¿½ï¿½Å¿ï¿½ï¿½Ú´ï¿½ï¿½Ð±ï¿½", "SungshinBamboo"),
+		new Univ("ï¿½ï¿½ï¿½Ö´ï¿½ï¿½Ð±ï¿½", "koungju15"),
+		new Univ("ï¿½Ñ¼ï¿½ï¿½ï¿½ï¿½Ð±ï¿½","HSUGrove"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½","SeoKyeongUnivBamboo"),
+		new Univ("ï¿½ï¿½ï¿½Î´ï¿½ï¿½Ð±ï¿½", "yonginbamboo"),
+		new Univ("ï¿½ï¿½Ãµï¿½ï¿½ï¿½Ð±ï¿½", "SCNUbamboo"),
+		new Univ("ï¿½ï¿½Ï´ï¿½ï¿½Ð±ï¿½", "KNUbamboo"),
+		new Univ("ï¿½Ñ¼ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "hanseibamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "knubambooforest"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "SKUBAMBOO"),
+		new Univ("ï¿½Î°ï¿½ï¿½ï¿½Ð±ï¿½", "PKNUBamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½È¸ï¿½ï¿½ï¿½Ð±ï¿½", "skhubamboo"),
+		new Univ("Ã»ï¿½Ö´ï¿½ï¿½Ð±ï¿½", "CJUbambooo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "ulsanbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "kunsanspeak"),
+		new Univ("È£ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "HonamUniversityBambooGrove"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "SMUBomboo"),
+		new Univ("ï¿½Î»ï¿½ï¿½ï¿½Ð±ï¿½", "pnubamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "syubamboo"),
+		new Univ("ï¿½Èµï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "ANUbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "bamboo1kmu"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "MNUBamboo"),
+		new Univ("ï¿½ï¿½ï¿½Ñ´ï¿½ï¿½Ð±ï¿½", "shinhan001"),
+		new Univ("ï¿½Ñµï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "1713654792215496"), //@
+		new Univ("ï¿½Ñ¹ï¿½ï¿½ï¿½Ð±ï¿½", "HNUbamboo"),
+		new Univ("ï¿½Ç¾ï¿½ï¿½ï¿½Ð±ï¿½", "kyuforest"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½Ð±ï¿½", "dssaytomeanything"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "KANGWONbamboo"),
+		new Univ("ï¿½ï¿½ï¿½Æ¹ï¿½Û¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "dongdeasup"),
+		new Univ("ï¿½Ý¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "daenamookumoh"),
+		new Univ("ï¿½ï¿½ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "ginuebamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½Ð±ï¿½", "1431832823796835"),//@
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "euljibamboo"),
+		new Univ("ï¿½ï¿½ï¿½Ï´ï¿½ï¿½Ð±ï¿½", "KIUBABOO"),
+		new Univ("ï¿½Ñ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "kartsbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "859759640748426"),//@
+		new Univ("Ä«ï¿½Ì½ï¿½Æ®", "kaistbamboofp"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½Ð±ï¿½", "dongdukbamboo"),
+		new Univ("ï¿½Î»ï¿½Ü±ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "BUFSbamboo"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "dailysangji"),
+		new Univ("ï¿½ï¿½ï¿½ï¿¹ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "realcommunicatedsia"),
+		new Univ("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½", "MJbamboo"),
+		new Univ("ï¿½Ñ¾ç¿©ï¿½Ú´ï¿½ï¿½Ð±ï¿½", "hywubamboo"),
+		new Univ("ï¿½ï¿½ï¿½Ç´ï¿½ï¿½Ð±ï¿½", "420588408103211")//@
+			
+	};
+
 	
-	public static final HashMap<String, String> univ;
-	static
-	{
-		univ = new HashMap<String, String>();
-		univ.put("ÇÑ±¹Ç×°ø´ëÇÐ±³","HangughangGongdaehaggyo");
-		univ.put("¼­¿ï´ëÇÐ±³", "SNUBamboo");
-		univ.put("¿¬¼¼´ëÇÐ±³", "yonseibamboo");
-		univ.put("°í·Á´ëÇÐ±³", "koreabamboo");
-		univ.put("¼­°­´ëÇÐ±³", "sogangbamboo");
-		univ.put("¼º±Õ°ü´ëÇÐ±³", "SKKUBamboo");
-		univ.put("ÇÑ¾ç´ëÇÐ±³", "hyubamboo");
-		univ.put("Áß¾Ó´ëÇÐ±³", "caubamboo");
-		univ.put("°æÈñ´ëÇÐ±³", "kyungheebamboo");
-		univ.put("ÇÑ±¹¿Ü±¹¾î´ëÇÐ±³", "hufsbamboo"); //globalbamboo ¿Ü´ëºí·Î¹úÄ·
-		univ.put("¼­¿ï½Ã¸³´ëÇÐ±³", "uosbamboo");
-		univ.put("¼þ½Ç´ëÇÐ±³", "sstt2015");
-		univ.put("Ãæ³²´ëÇÐ±³", "ChungNamNationalBamboo");
-		univ.put("¾ÆÁÖ´ëÇÐ±³", "ajoubamboo");
-		univ.put("µ¿±¹´ëÇÐ±³", "donggukbamboo");
-		univ.put("¸íÁö´ëÇÐ±³", "mjubamboo");
-		univ.put("¼¼Á¾´ëÇÐ±³", "sejongbamboo");
-		univ.put("ÇÑ±¹±³Åë´ëÇÐ±³", "KnutBambooForest");
-		univ.put("¼­¿ï¿©ÀÚ´ëÇÐ±³", "swubamboo");		
-		univ.put("À¯´Ï½ºÆ®", "unibamboooo0");
-		univ.put("±¤¿î´ëÇÐ±³", "kwubamboo");
-		univ.put("´Ü±¹´ëÇÐ±³", "dkubamboo");
-		univ.put("¼­¿ï°úÇÐ±â¼ú´ëÇÐ±³", "seoultechbamboo");
-		univ.put("È«ÀÍ´ëÇÐ±³", "hongikbamboo");
-		univ.put("»ó¸í´ëÇÐ±³", "smubb");
-		univ.put("ÀÎÇÏ´ëÇÐ±³", "inhabamboo2");
-		univ.put("ÃæºÏ´ëÇÐ±³", "chungbuknubamboo");
-		univ.put("µ¿±¹´ëÇÐ±³", "donggukbamboo");
-		univ.put("ÀüºÏ´ëÇÐ±³", "jbnusay");
-		univ.put("ÇÑ¾ç´ë¿¡¸®Ä«", "ericadruwa");
-		univ.put("ÀÎÃµ´ëÇÐ±³", "incheonbamboo");
-		univ.put("¼­¿ï±³À°´ëÇÐ±³", "snuebamboo");
-		univ.put("Æ÷Ç×°ø°ú´ëÇÐ±³", "postechbamboo");
-		univ.put("¼øÃµÇâ´ëÇÐ±³", "schubamboo");
-		univ.put("¼÷¸í¿©ÀÚ´ëÇÐ±³", "bamboosmwu");
-		univ.put("Áö½ºÆ®", "GISTIT.ac.kr");
-		univ.put("°¡Åç¸¯´ëÇÐ±³", "CUKbby");
-		univ.put("°¡Ãµ´ëÇÐ±³", "gcubamboo");
-		univ.put("°æ±â´ëÇÐ±³", "kyonggibamboo");
-		univ.put("±¹¸³°æ»ó´ëÇÐ±³", "gnubamboo1"); //???
-		univ.put("°Ç±¹´ëÇÐ±³", "konkukbamboo");
-		univ.put("¿µ³²´ëÇÐ±³", "yubamboo.net");
-		univ.put("°æºÏ´ëÇÐ±³", "KNUbamboo");
-		univ.put("Àü³²´ëÇÐ±³", "MaeGuemI");
-		univ.put("µ¿¾Æ´ëÇÐ±³", "dongabamboo");
-		univ.put("ºÎ°æ´ëÇÐ±³", "PKNUBamboo");
-		univ.put("¼º½Å¿©ÀÚ´ëÇÐ±³", "SungshinBamboo");
-		univ.put("°øÁÖ´ëÇÐ±³", "koungju15");
-		univ.put("ÇÑ¼º´ëÇÐ±³","HSUGrove");
-		univ.put("¼­°æ´ëÇÐ±³","SeoKyeongUnivBamboo");
-		univ.put("¿ëÀÎ´ëÇÐ±³", "yonginbamboo");
-		univ.put("¼øÃµ´ëÇÐ±³", "SCNUbamboo");
-		univ.put("°æºÏ´ëÇÐ±³", "KNUbamboo");
-		univ.put("ÇÑ¼¼´ëÇÐ±³", "hanseibamboo");
-		univ.put("°­³²´ëÇÐ±³", "knubambooforest");
-		univ.put("¼º°á´ëÇÐ±³", "SKUBAMBOO");
-		univ.put("ºÎ°æ´ëÇÐ±³", "PKNUBamboo");
-		univ.put("¼º°øÈ¸´ëÇÐ±³", "skhubamboo");
-		univ.put("Ã»ÁÖ´ëÇÐ±³", "CJUbambooo");
-		univ.put("¿ï»ê´ëÇÐ±³", "ulsanbamboo");
-		univ.put("±º»ê´ëÇÐ±³", "kunsanspeak");
-		univ.put("È£³²´ëÇÐ±³", "HonamUniversityBambooGrove");
-		univ.put("¼¼¸í´ëÇÐ±³", "SMUBomboo");
-		univ.put("ºÎ»ê´ëÇÐ±³", "pnubamboo");
-		univ.put("»ïÀ°´ëÇÐ±³", "syubamboo");
-		univ.put("¾Èµ¿´ëÇÐ±³", "ANUbamboo");
-		univ.put("°è¸í´ëÇÐ±³", "bamboo1kmu");
-		univ.put("¸ñÆ÷´ëÇÐ±³", "MNUBamboo");
-		univ.put("½ÅÇÑ´ëÇÐ±³", "shinhan001");
-//		univ.put("ÇÑµ¿´ëÇÐ±³", "ÇÑµ¿´ëÇÐ±³-´ë³ª¹«½£-1713654792215496");
-		univ.put("ÇÑ¹ç´ëÇÐ±³", "HNUbamboo");
-		univ.put("°Ç¾ç´ëÇÐ±³", "kyuforest");
-		univ.put("´ö¼º¿©ÀÚ´ëÇÐ±³", "dssaytomeanything");
-		univ.put("°­¿ø´ëÇÐ±³", "KANGWONbamboo");
-		univ.put("µ¿¾Æ¹æ¼Û¿¹¼ú´ëÇÐ±³", "dongdeasup");
-		univ.put("±Ý¿À°ø°ú´ëÇÐ±³", "daenamookumoh");
-		univ.put("°æÀÎ±³À°´ëÇÐ±³", "ginuebamboo");
-//		univ.put("µ¿´ö¿©ÀÚ´ëÇÐ±³", "µ¿´ö¿©´ë-´ë³ª¹«½£-1431832823796835");
-		univ.put("À»Áö´ëÇÐ±³", "euljibamboo");
-		univ.put("°æÀÏ´ëÇÐ±³", "KIUBABOO");
-		univ.put("ÇÑ±¹¿¹¼úÁ¾ÇÕÇÐ±³", "kartsbamboo");
-//		univ.put("µ¿¼­´ëÇÐ±³", "µ¿¼­´ë-´ë³ª¹«½£-859759640748426");
-		univ.put("Ä«ÀÌ½ºÆ®", "kaistbamboofp");
-		univ.put("µ¿´ö¿©ÀÚ´ëÇÐ±³", "dongdukbamboo");
-		univ.put("ºÎ»ê¿Ü±¹¾î´ëÇÐ±³", "BUFSbamboo");
-		univ.put("»óÁö´ëÇÐ±³", "dailysangji");
-		univ.put("¼­¿ï¿¹¼ú´ëÇÐ±³", "realcommunicatedsia");
-		univ.put("¸íÁö´ëÇÐ±³", "MJbamboo");
-		univ.put("ÇÑ¾ç¿©ÀÚ´ëÇÐ±³", "hywubamboo");
-//		univ.put("µ¿ÀÇ´ëÇÐ±³", "µ¿ÀÇ´ëÇÐ±³-´ë³ª¹«½£-420588408103211");
-//		Sub nddd()
-//		For i = 0 To 40
-//		    a = Split([d1].Offset(i, 0), " ")
-//		    [a1].Offset(i, 0) = "univ.put(""" & a(0) & """, """ & a(1) & """);"
-//		Next
-//		End Sub
-
-
-		
-	}
 }
+
+
+
+//mysql -u root -p -S /cloudsql/soop-159218:asia-east1:soop-db

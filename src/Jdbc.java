@@ -1,6 +1,7 @@
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 
@@ -8,7 +9,7 @@ public class Jdbc {
 	private String url;
 	private String id;
 	private String pw;
-	private static Connection con=null;
+	private Connection con;
 	
 	
 	/**
@@ -18,26 +19,48 @@ public class Jdbc {
 		this.url = url;
 		this.id = id;
 		this.pw = pw;
+//		try {
+//			Class.forName("com.mysql.jdbc.Driver");
+//			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);			
+//			
+//		} catch (ClassNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
 	}
+	public void closeConnection(){
 
+		try {
+			con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	
 	/**
 	 * 최근 업데이트 일시를 DB로부터 불러옵니다.
-	 * @param univName
-	 * 		대상 학교명.  <p>어느 학교의 업데이트 일시를 받아올지 지정합니다.  
+	 * @param univKey
+	 * 		대상 학교번호.  <p>어느 학교의 업데이트 일시를 받아올지 지정합니다.  
 	 * @return 
 	 * 		최근 업데이트 일시를 String형태로 반환합니다.<p> 
 	 */
-	public String getRecentUpdate(String univName){
-		String recentUpdate = null;
+	public String getRecentUpdate(int univKey){
+		String recentUpdate = Constants.defaultRecentUpdate;
 		try {			
-			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw); 
+			Class.forName("com.mysql.jdbc.Driver");
+			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);			
+			
 			java.sql.Statement st = null;
 			ResultSet rs = null;
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT MAX(time) FROM updates WHERE univName='"+univName+"';");
-			if (st.execute("SELECT MAX(time) FROM updates WHERE univName='"+univName+"';")) {
+			rs = st.executeQuery("SELECT MAX(time) FROM updates WHERE univKey="+univKey+";");
+			if (st.execute("SELECT MAX(time) FROM updates WHERE univKey="+univKey+";")) {
 				rs = st.getResultSet();
 			}
 			while (rs.next()) {
@@ -51,6 +74,8 @@ public class Jdbc {
 			System.out.println("SQLException: " + sqex.getMessage());
 			System.out.println("SQLState: " + sqex.getSQLState());
 			
+		}catch(Exception e){ 
+			System.out.println(e.toString()); 
 		}
 		return recentUpdate;
 	}
@@ -61,10 +86,13 @@ public class Jdbc {
 	 *  최근 업데이트 일시를 인자로 받아 DB에 저장합니다.
 	 * @param dateString
 	 * 		저장할 일시. 저장/관리의 편의를 위해 'yyyy-MM-dd HH:mm:ss'형태의 String으로 받아옵니다.
-	 * @param univName
+	 * @param univKey
+	 * 		대상 학교번호.
 	 */
-	public void setRecentUpdate(String dateString,String univName){ 
-		updateQuery("INSERT INTO updates(time,univName) values('" + dateString + "','"+univName+"');");
+	public void setRecentUpdate(String dateString, int univKey){
+//		System.out.println("[[[["+Constants.fm.format(new Date()));
+		updateQuery("INSERT INTO updates(time,univKey) values('" + dateString + "',"+univKey+");");
+		
 //		getRecentUpdate();
 	}
 	
@@ -79,10 +107,10 @@ public class Jdbc {
 	public void writeSimpleInformations(ArrayList<Article> articles){
 		for(Article article : articles){
 			updateQuery(
-					"INSERT INTO articles(id,created_time,univName) "+
+					"INSERT INTO articles(id,created_time,univKey) "+
 					"VALUES('" + article.getId() + "','" +
-								 article.getCreatedTime() + "', '" +
-								 article.getUnivName() + "');"
+								 article.getCreatedTime() + "', " +
+								 article.getUnivKey() + ");"
 						);	
 		}
 		
@@ -93,21 +121,22 @@ public class Jdbc {
 	
 	/**
 	 * 학교이름에 해당하는 모든 글의 id만을 DB의 해당 테이블로부터 불러옵니다.
-	 * @param univName
-	 * 		대상 학교.
+	 * @param univKey
+	 * 		대상 학교번호.
 	 * @param tableName
 	 * 		DB상의 테이블 명.
 	 */
-	public ArrayList<String> readIds(String univName,String tableName){
+	public ArrayList<String> readIds(int univKey,String tableName){
 		ArrayList<String> list = new ArrayList<String>();
 		try {			
-			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);
-
+			Class.forName("com.mysql.jdbc.Driver");
+			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);			
+			
 			java.sql.Statement st = null;
 			ResultSet rs = null;
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT id FROM "+tableName+" WHERE univName='" + univName + "';");
-			if (st.execute("SELECT id FROM "+tableName+" WHERE univName='" + univName + "';")) {
+			rs = st.executeQuery("SELECT id FROM "+tableName+" WHERE univKey=" + univKey + ";");
+			if (st.execute("SELECT id FROM "+tableName+" WHERE univKey=" + univKey + ";")) {
 				rs = st.getResultSet();
 			}
 			while (rs.next()) {
@@ -116,6 +145,8 @@ public class Jdbc {
 		} catch (SQLException sqex) {
 			System.out.println("SQLException: " + sqex.getMessage());
 			System.out.println("SQLState: " + sqex.getSQLState());
+		}catch(Exception e){ 
+			System.out.println(e.toString()); 
 		}
 		return list;
 	}
@@ -123,30 +154,31 @@ public class Jdbc {
 	
 	/**
 	 * 학교이름에 해당하는 모든 글을 DB의 해당 테이블로부터 불러옵니다.
-	 * @param univName
-	 * 		대상 학교.
+	 * @param univKey
+	 * 		대상 학교번호.
 	 * @param tableName
 	 * 		DB상의 테이블 명.
 	 * @return
 	 * 		ArrayList<Article>형태로 반환합니다.
 	 */
-	public ArrayList<Article> readArticles(String univName,String tableName){
+	public ArrayList<Article> readArticles(int univKey,String tableName){
 		ArrayList<Article> articles = new ArrayList<Article>();
 		try {			
-			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);
-
+			Class.forName("com.mysql.jdbc.Driver");
+			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);			
+			
 			java.sql.Statement st = null;
 			ResultSet rs = null;
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT * FROM "+tableName+" WHERE univName='" + univName + "';");
-			if (st.execute("SELECT * FROM "+tableName+" WHERE univName='" + univName + "';")) {
+			rs = st.executeQuery("SELECT * FROM "+tableName+" WHERE univKey=" + univKey + ";");
+			if (st.execute("SELECT * FROM "+tableName+" WHERE univKey=" + univKey + ";")) {
 				rs = st.getResultSet();
 			}
 			while (rs.next()) {
 				Article article = new Article(
 						rs.getString("id"),
 						rs.getString("created_time"),
-						univName,
+						univKey,
 						rs.getInt("interesting"),
 						rs.getInt("likes"),
 						rs.getInt("comments"),
@@ -157,6 +189,9 @@ public class Jdbc {
 		} catch (SQLException sqex) {
 			System.out.println("SQLException: " + sqex.getMessage());
 			System.out.println("SQLState: " + sqex.getSQLState());
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return articles;
 	}
@@ -182,29 +217,50 @@ public class Jdbc {
 		}
 		
 	}
+	
+	
+	
+	public void updateWeekTable(){
+		
+	}
+	
+	public void updateBestTable(){
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 *  학교별 흥미도로 정렬한 상위 몇개의 글들을 DB로부터 받아와
 	 *  Article의 ArrayList 형태로 반환합니다. 
 	 *  <p> DB상의 'articles'테이블에서 가져와 반환합니다.
-	 * @param univName
-	 * 		대상 학교.
+	 * @param univKey
+	 * 		대상 학교번호.
 	 * @param limitNumber
 	 * 		글 수 제한.
 	 * @return
 	 * 		Article의 ArrayList형태로  반환.
 	 */
-	public ArrayList<Article> fetchInterestingArticles(String univName, int limitNumber){
+	public ArrayList<Article> fetchInterestingArticles(int univKey, int limitNumber){
 		ArrayList<Article> articles = new ArrayList<Article>();
 		try {			
-			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);
+			Class.forName("com.mysql.jdbc.Driver");
+			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);			
+			
 			java.sql.Statement st = null;
 			ResultSet rs = null;
 			st = con.createStatement();
 			String query = 
 					  "SELECT * "
 					+ "FROM articles "
-					+ "WHERE univName = '" + univName
-					+ "' and interesting > "+ Constants.interestingMin
+					+ "WHERE univKey = " + univKey
+					+ " and interesting > "+ Constants.interestingMin
 					+ " ORDER BY interesting DESC "
 					+ "LIMIT "+limitNumber
 					+ ";";
@@ -217,7 +273,7 @@ public class Jdbc {
 				Article article = new Article(
 						rs.getString("id"),
 						rs.getString("created_time"),
-						univName,
+						univKey,
 						rs.getInt("interesting"),
 						rs.getInt("likes"),
 						rs.getInt("comments"),
@@ -228,6 +284,8 @@ public class Jdbc {
 		} catch (SQLException sqex) {
 			System.out.println("SQLException: " + sqex.getMessage());
 			System.out.println("SQLState: " + sqex.getSQLState());
+		}catch(Exception e){ 
+			System.out.println(e.toString()); 
 		}
 		return articles;
 	}
@@ -241,9 +299,6 @@ public class Jdbc {
 	public void writeInterestingArticles(ArrayList<Article> articles){
 		
 		for (Article article : articles){
-//			System.out.println(article.getId());
-//			System.out.println(article.get("created_time"));
-//			System.out.println(article.get("univName"));
 			String message = article.getMessage();
 			if (message!=null){
 //				message = " "+message+" ";
@@ -253,15 +308,15 @@ public class Jdbc {
 			}else
 				message = "내용이 없는 글입니다.";
 			updateQuery(
-					"INSERT INTO interestingArticles(id,likes,comments,shares,message,created_time,interesting,univName) "+
+					"INSERT INTO interestingArticles(id,likes,comments,shares,message,created_time,interesting,univKey) "+
 					"VALUES('" + article.getId() +"', "
 							+ article.getLikes() +", "
 							+ article.getComments() +", "
 							+ article.getShares() +", '"
 							+ message +"', '"
 							+ article.getCreatedTime() +"', "
-							+ article.getInteresting() +", '"
-							+ article.getUnivName() +"');"
+							+ article.getInteresting() +", "
+							+ article.getUnivKey() +");"
 						);
 			
 		}
@@ -276,16 +331,14 @@ public class Jdbc {
 	 */
 	private void updateQuery(String q){
 		try{ 
-			Connection con = null;
-			java.sql.Statement stmt = null;
 			Class.forName("com.mysql.jdbc.Driver");
-			con = DriverManager.getConnection(url,id,pw); 
+			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);			
+			
+			java.sql.Statement stmt = null;
 			stmt = con.createStatement();
 			stmt.executeUpdate(q);		
 			stmt.close();
 			con.close();
-		}catch(ClassNotFoundException cnfe){ 
-			System.out.println("jdbc mysql Driver를 찾을 수 없습니다."); 
 		}catch(SQLException  sqle){ 
 			System.err.println(sqle.toString());
 		}catch(Exception e){ 

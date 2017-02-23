@@ -12,11 +12,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import javax.security.sasl.AuthenticationException;
+
 import com.restfb.Connection;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
+import com.restfb.FacebookClient.AccessToken;
 import com.restfb.Parameter;
 import com.restfb.Version;
+import com.restfb.exception.FacebookException;
 import com.restfb.json.JsonObject;
 import com.restfb.types.Post;
 
@@ -54,22 +58,24 @@ public class Soop {
 	 *  	바꾸어 줄 새로운 액세스 토큰입니다.<p>
 	 */
 	public void changeAccessToken(String accessToken){
-		this.accessToken = accessToken;		
+		this.accessToken = accessToken;
+//		System.out.println(fbClient.obtainAppAccessToken(appSecret, accessToken));
+
 	}
+
+	
 
 	/**
 	 * 현재글, 현재 좋댓공을 가지고 흥미로운글 만을 추가하는 작업을 수행합니다. 
 	 * 
 	*/
-	public int updateInterestingArticles() {
-		System.out.println(fbClient.obtainAppAccessToken(appSecret, accessToken));
-		Iterator<String> it = Constants.univ.keySet().iterator();
+	public int updateInterestingArticles() {		
 		int numberOfUnivs=0;
-		while( it.hasNext() ){        	
-			String univName = it.next();
+		for(int i=0;i<Constants.univs.length;i++){        	
+			int univKey = i;
 			System.out.println("==========================================");							    
-			System.out.println("<"+univName + " 흥미로운 글 가져오기 시작> ["+(numberOfUnivs+1)+"/"+(Constants.univ.size())+"]");
-			addInterestingArticles(univName,Constants.interestingLimit);
+			System.out.println("<"+Constants.univs[univKey].getName() + " 흥미로운 글 가져오기 시작> ["+(numberOfUnivs+1)+"/"+(Constants.univs.length)+"]");
+			addInterestingArticles(univKey,Constants.interestingLimit);
 			numberOfUnivs++;
 		}
 		return numberOfUnivs;
@@ -84,19 +90,19 @@ public class Soop {
 	 * 그리고 흥미지수를 바탕으로 일정개수를 뽑아 흥미로운 테이블에 추가합니다.
 	 */	
 	public int updateAll() {
-		Iterator<String> it = Constants.univ.keySet().iterator();
 		int numberOfUnivs=0;
-		while( it.hasNext() ){        	
-			String univName = it.next();
+		for(int i=0;i<Constants.univs.length;i++){        	
+			int univKey = i;
 			System.out.println("==========================================");							    
-			System.out.println("<"+univName + " 크롤링 시작> ["+(numberOfUnivs+1)+"/"+(Constants.univ.size())+"]");
-			
-			getSimpleArticles(univName);
-			getInterestInformations(univName);
-			addInterestingArticles(univName,Constants.interestingLimit);
+			System.out.println("<"+Constants.univs[univKey].getName() + " 크롤링 시작> ["+(numberOfUnivs+1)+"/"+(Constants.univs.length)+"]");
+			getSimpleArticles(univKey);
+			getInterestInformations(univKey);
+			addInterestingArticles(univKey,Constants.interestingLimit);
 			numberOfUnivs++;
 		}
-		outPutLog();
+//		updateResultTable();
+//		outPutLog();
+		db.closeConnection();
 		return numberOfUnivs;
 
 	}
@@ -111,19 +117,18 @@ public class Soop {
 	 * <p>
 	 */	
 	public int updateAll(String criteriorDateString) {
-		Iterator<String> it = Constants.univ.keySet().iterator();
 		int numberOfUnivs=0;
-		while( it.hasNext() ){        	
-			String univName = it.next();
+		for(int i=0;i<Constants.univs.length;i++){        	
+			int univKey = i;
 			System.out.println("==========================================");    		    
-			System.out.println("<"+univName + " 크롤링 시작> ["+(numberOfUnivs+1)+"/"+(Constants.univ.size())+"]");
-			
-			getSimpleArticles(univName,criteriorDateString);
-			getInterestInformations(univName);
-			addInterestingArticles(univName,Constants.interestingLimit);
+			System.out.println("<"+Constants.univs[univKey].getName() + " 크롤링 시작> ["+(numberOfUnivs+1)+"/"+(Constants.univs.length)+"]");
+			getSimpleArticles(univKey,criteriorDateString);
+			getInterestInformations(univKey);
+			addInterestingArticles(univKey,Constants.interestingLimit);
 			numberOfUnivs++;
 		}
-		
+//		updateResultTable();
+		db.closeConnection();
 		return numberOfUnivs;
 	}
 	
@@ -135,20 +140,20 @@ public class Soop {
 	 * 		대상 학교명. <p>어느 학교의 글을 받아올지 설정합니다.
 	 * <p>
 	 */	
-	private void getSimpleArticles(String univName){
+	private void getSimpleArticles(int univKey){
 		ArrayList<Article> articles = new ArrayList<Article>();
-		String recentUpdateString = db.getRecentUpdate(univName);
-		System.out.println("이전 크롤링 시각 : " + recentUpdateString);
+		String recentUpdateString = db.getRecentUpdate(univKey);
+		System.out.println("이전(최소기준) 크롤링 시각 : " + recentUpdateString);
 		Connection<Post> feed;
 		feed = 
-				fbClient.fetchConnection(Constants.univ.get(univName) + "/posts", Post.class,
-						Parameter.with("limit", 50), Parameter.with("fields", "id,created_time"));
+				fbClient.fetchConnection(Constants.univs[univKey].getUrl() + "/posts", Post.class,
+						Parameter.with("limit", 100), Parameter.with("fields", "id,created_time"));
 					//	여기에서 바로 since Parameter로 적용할수도있을까?
 //		System.err.println("액세스토큰!");
 		int numberOfFinished=0;
 		pLoop:
 		for (List<Post> myFeedConnectionPage : feed){
-			System.out.println("현재 새 글 " + numberOfFinished + "개 받아옴..."); // (약) 50개 단위로 출력(접근권한없는글 누락될수있음.)
+			System.out.println("현재 새 글 " + numberOfFinished + "개 받아옴..."); // (약) 100개 단위로 출력(접근권한없는글 누락될수있음.)
 			for (Post post : myFeedConnectionPage){
 				if (post != null){			
 					Date recentUpdate = null;
@@ -160,12 +165,11 @@ public class Soop {
 					}
 					if (numberOfFinished == this.limit || // 동작 이상으로 너무 많이 받았거나 
 						post.getCreatedTime().compareTo(recentUpdate) == -1){ // 최근 업데이트보다 이전에 올라온 글이면 그만 받기.
-						db.setRecentUpdate(Constants.fm.format(new Date()),univName);
-						System.out.println(univName + " 새 글 총" + numberOfFinished + "개 크롤링 완료!");
+						//      이글의cretedTime < recentUpdate
 						break pLoop;
 					}
-					else{
-						Article article = new Article(post.getId(),Constants.fm.format(post.getCreatedTime()),univName);
+					else{ //	이글의createdTime >= recentUpdate
+						Article article = new Article(post.getId(),Constants.fm.format(post.getCreatedTime()),univKey);
 						articles.add(article);
 						numberOfFinished++;
 						
@@ -173,10 +177,14 @@ public class Soop {
 				}
 			}
 		}
+		
+		System.out.println("새 글 총" + numberOfFinished + "개 받아옴!");
 		System.out.println("받아온 자료를 DB에 전송하는중...");
 		db.writeSimpleInformations(articles); // 기본정보들을 DB에 저장.
+		db.setRecentUpdate(Constants.fm.format(new Date()),univKey);
+		System.out.println(Constants.univs[univKey].getName() + " 새 글 총" + numberOfFinished + "개 크롤링 완료!");
 		
-		System.out.println("새글 크롤링 완료시각 : "+Constants.fm.format(new Date()));
+		System.out.println("새 글 DB전송 완료시각 : "+Constants.fm.format(new Date()));
 		System.out.println("------------------------------------------");
 	}
 	
@@ -191,18 +199,18 @@ public class Soop {
 	 * 		대상 학교. 어느 학교의 글을 받아올지 설정합니다.
 	 * 
 	 */
-	private void getSimpleArticles(String univName,String dateString){
+	private void getSimpleArticles(int univKey,String dateString){
 		ArrayList<Article> articles = new ArrayList<Article>();
 		String criteriorDateString = dateString;	
 		System.out.println("기준 크롤링 시각 : " + criteriorDateString);
 		Connection<Post> feed = 
-				fbClient.fetchConnection(Constants.univ.get(univName) + "/posts", Post.class,
-						Parameter.with("limit", 50), Parameter.with("fields", "id,created_time"));
+				fbClient.fetchConnection(Constants.univs[univKey].getUrl() + "/posts", Post.class,
+						Parameter.with("limit", 100), Parameter.with("fields", "id,created_time"));
 					//	여기에서 바로 since Parameter로 적용할수도있을까?
 		int numberOfFinished=0;
 		pLoop:
 		for (List<Post> myFeedConnectionPage : feed){
-			System.out.println("현재 새 글 " + numberOfFinished + "개 받아옴..."); // (약) 50개 단위로 출력(접근권한없는글 누락될수있음.)
+			System.out.println("현재 새 글 " + numberOfFinished + "개 받아옴..."); // (약) 100개 단위로 출력(접근권한없는글 누락될수있음.)
 			for (Post post : myFeedConnectionPage){
 				if (post != null){			
 					Date creteriorDate = null;
@@ -212,23 +220,26 @@ public class Soop {
 						e.printStackTrace();
 					}
 					if (numberOfFinished == this.limit || // 동작 이상으로 너무 많이 받았거나 
-						post.getCreatedTime().compareTo(creteriorDate) == -1){ // 최근 업데이트보다 이전에 올라온 글이면 그만 받기.
-						db.setRecentUpdate(Constants.fm.format(new Date()),univName);
-						System.out.println(univName + " 새 글 총" + numberOfFinished + "개 크롤링 완료!");
+						post.getCreatedTime().compareTo(creteriorDate) == -1){ // if< 최근 업데이트보다 이전에 올라온 글이면 그만 받기.
+						// cret >DB읽or기본값
 						break pLoop;
 					}
-					else{
-						articles.add(new Article(post.getId(),Constants.fm.format(post.getCreatedTime()),univName));
+					else{ // cret <=DB읽or기본값
+						articles.add(new Article(post.getId(),Constants.fm.format(post.getCreatedTime()),univKey));
 						numberOfFinished++;
 						
 					}
 				}
 			}
 		}
+		System.out.println("새 글 총" + numberOfFinished + "개 받아옴!");
 		System.out.println("받아온 자료를 DB에 전송하는중...");
 		db.writeSimpleInformations(articles); // 기본정보들을 DB에 저장.
+		db.setRecentUpdate(Constants.fm.format(new Date()),univKey);
+		System.out.println(Constants.univs[univKey].getName() + " 새 글 총" + numberOfFinished + "개 크롤링 완료!");		
+				
 		
-		System.out.println("새글 크롤링 완료시각 : "+Constants.fm.format(new Date()));
+		System.out.println("새 글 DB전송 완료시각 : "+Constants.fm.format(new Date()));
 		System.out.println("------------------------------------------");
 	}
 
@@ -243,10 +254,10 @@ public class Soop {
 	 * @param univName
 	 * 		대상 학교. 
 	 */
-	private void getInterestInformations(String univName){	
+	private void getInterestInformations(int univKey){	
 		ArrayList<Article> articles = new ArrayList<Article>();		
-		System.out.println(univName+" 좋아요, 댓글, 공유 수 업데이트 시작..");
-		ArrayList<String> ids = db.readIds(univName,"articles");
+		System.out.println(Constants.univs[univKey].getName()+" 좋아요, 댓글, 공유 수 업데이트 시작..");
+		ArrayList<String> ids = db.readIds(univKey,"articles");
 		int numberOfFinished=0;		
 		int sizeOfList = ids.size();
 		int quotient = (int) ( (sizeOfList-1) / 50)+1; 
@@ -259,17 +270,18 @@ public class Soop {
 			try{
 			obj =  fbClient.fetchObjects(subIds,
 					JsonObject.class,
-					Parameter.with("fields", "likes.limit(0).summary(true),comments.limit(0).summary(true),shares.limit(0).summary(true)"));
+					Parameter.with("fields", "reactions.summary(true).limit(0),comments.limit(0).summary(true),shares.limit(0).summary(true)"));
 			//	파라미터 쓰는법 제대로 알자
 			}
 			catch(Exception e){
 				System.err.println("이상발생! 아마 망한페이지같다!");
 			}
 			for(String id: subIds){
-				try{
-					int likes = obj.getJsonObject(id).getJsonObject("likes").getJsonObject("summary").getInt("total_count");
+				try{ //@@ like말고 다른거도 받아와야지 화나요 멋져요 같은거
+					int likes = obj.getJsonObject(id).getJsonObject("reactions").getJsonObject("summary").getInt("total_count"); //reaction emotion haha sad happy...
 					int comments = obj.getJsonObject(id).getJsonObject("comments").getJsonObject("summary").getInt("total_count");
 					int shares = 0;
+					
 					if (obj.getJsonObject(id).has("shares"))
 						shares = obj.getJsonObject(id).getJsonObject("shares").getInt("count");
 					articles.add(new Article(id,likes,comments,shares));
@@ -285,7 +297,7 @@ public class Soop {
 		}		
 		System.out.println("받아온 자료를 DB에 전송하는중...");
 		db.writeInterestInformations(articles);
-		System.out.println(univName+" 좋아요, 댓글, 공유 수 각각 "+ids.size() +"개 업데이트 완료!");
+		System.out.println(Constants.univs[univKey].getName()+" 좋아요, 댓글, 공유 수 각각 "+ids.size() +"개 업데이트 완료!");
 		System.out.println("------------------------------------------");
 	}
 
@@ -302,9 +314,11 @@ public class Soop {
 	 *  
 	 * @param UnivName
 	 */
-	private void addInterestingArticles(String univName,int limitNumber){
-		System.out.println("흥미로운 상위 "+Constants.interestingLimit +"개의 데이터를 추려 받아오는중...");
-		ArrayList<Article> articles = db.fetchInterestingArticles(univName, limitNumber);//db에서 (조건만족하는) 해당학교의 상위 n개 뽑아옴.
+	private void addInterestingArticles(int univKey,int limitNumber){
+		System.out.println("흥미로운 상위 "+limitNumber +"개의 데이터를 추려 받아오는중...");
+		//페이지 구독수 받아오기
+		limitNumber = 9;//동적으로 처리해야돼. 
+		ArrayList<Article> articles = db.fetchInterestingArticles(univKey, limitNumber);//db에서 (조건만족하는) 해당학교의 상위 n개 뽑아옴.
 		//graph에 요청해서 message받아와
 		List<String> ids = new ArrayList<String>();		
 		for(Article article : articles){
@@ -338,7 +352,7 @@ public class Soop {
 
 		System.out.println("받아온 자료를 DB에 전송하는중...");
 		db.writeInterestingArticles(articles);
-		System.out.println(univName+" 흥미로운 자료 업로드 완료.");
+		System.out.println(Constants.univs[univKey].getName()+" 흥미로운 자료 업로드 완료.");
 		
 		
 	}
@@ -365,6 +379,42 @@ public class Soop {
 		        System.out.println("Error during reading/writing");
 		   }
 	}
+	
+	
+	
+	
+	/**
+	 * Exchange the short lived token (2h) for a long lived one (60j).
+	 * 
+	 * @param accessToken Short lived token
+	 * @return Long lived token
+	 * @throws AuthenticationException Invalid token
+	 */
+	public String getExtendedAccessToken(String accessToken) throws AuthenticationException {
+	    
+	    AccessToken extendedAccessToken = null;
+	    try {
+	        extendedAccessToken = fbClient.obtainExtendedAccessToken(Constants.appId, Constants.appSecret, Constants.accessToken);
+
+//	        if (log.isDebugEnabled()) {
+//	            log.debug(MessageFormat.format("Got long lived session token {0} for token {1}", extendedAccessToken, accessToken));
+//	        }
+	        
+	    } catch (FacebookException e) {
+	        if (e.getMessage().contains("Error validating access token")) {
+	            throw new AuthenticationException("Error validating access token");
+	        }
+	            
+	        throw new RuntimeException("Error exchanging short lived token for long lived token", e);
+	    }
+	    return extendedAccessToken.getAccessToken();
+	}
+	
+	private void updateResultTable(){
+		db.updateWeekTable();
+		db.updateBestTable();
+	}
+	
 	
 	
 	/**
