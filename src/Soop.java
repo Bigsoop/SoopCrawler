@@ -314,45 +314,57 @@ public class Soop {
 	 * 		대상 학교번호.
 	 */
 	private void addInterestingArticles(int univKey,int limitNumber){
-		System.out.println("흥미로운 상위 "+limitNumber +"개의 데이터를 추려 받아오는중...");
+//		System.out.println("흥미로운 상위 "+limitNumber +"개의 데이터를 추려 받아오는중...");
+		System.out.println("흥미로운 글 데이터를 추려 받아오는중...");
 		//페이지 구독수 받아오기
-		limitNumber = 9;//동적으로 처리해야돼. 
-		ArrayList<Article> articles = db.fetchInterestingArticles(univKey, limitNumber);//db에서 (조건만족하는) 해당학교의 상위 n개 뽑아옴.
-		//graph에 요청해서 message받아와
-		List<String> ids = new ArrayList<String>();		
-		for(Article article : articles){
-			ids.add(article.getId()); //id만 뽑아서 요청하는데 쓸 것임.
-		}
-		JsonObject obj = null;
-		try{
-		 obj =  fbClient.fetchObjects(ids,
-					JsonObject.class,
-					Parameter.with("fields", "message"));
-		}
-		catch(IllegalArgumentException e){
-			System.err.println("빈 리스트 오류발생!");
-			
-		}
-		for(String id: ids){
-			try{ 
-				String message = obj.getJsonObject(id).getString("message");
-				for(Article article : articles){					
-					if(article.getId()==id){
-						article.setMessage(message);
-					}
-					
-				}
-			}catch(Exception e){ 
-				System.err.println("메시지가 없는 글입니다.");
-				System.err.println(id);
+//		ArrayList<Article> articles = db.fetchInterestingArticles(univKey, limitNumber);//db에서 (조건만족하는) 해당학교의 상위 n개 뽑아옴.
+		ArrayList<Article> articles = db.fetchInterestingArticles(univKey);//db에서 (조건만족하고) 아직 추가안된 해당학교의 글 모두 뽑아옴.
+		
+		
+		
+		
+		int numberOfFinished=0;		
+		int sizeOfList = articles.size();
+		int quotient = (int) ( (sizeOfList-1) / 50)+1; 
+//		System.out.println(quotient);
+		for(int i=0; i<quotient; i++){
+		
+			List<Article> subArticles = // 50개 씩 나눠서 요청해야 함.
+					articles.subList(	i*50,	Math.min(i*50+50,sizeOfList)	);
+			List<String> subIds = new ArrayList<String>();		
+			for(Article article : subArticles){
+				subIds.add(article.getId()); //id만 뽑아서 요청하는데 쓸 것임.
 			}
-		}
-	
+			
+			JsonObject obj = null;
+			try{
+			 obj =  fbClient.fetchObjects(subIds,
+						JsonObject.class,
+						Parameter.with("fields", "message"));
+			}
+			catch(IllegalArgumentException e){
+				System.err.println("빈 리스트 오류발생!");
+				
+			}
+			for(String id: subIds){
+				try{ 
+					String message = obj.getJsonObject(id).getString("message");
+					for(Article article : articles){					
+						if(article.getId()==id){
+							article.setMessage(message);
+						}
+						
+					}
+				}catch(Exception e){ 
+					System.err.println("메시지가 없는 글입니다.");
+					System.err.println(id);
+				}
+			}
+		}	
 
 		System.out.println("받아온 자료를 DB에 전송하는중...");
 		db.writeInterestingArticles(articles);
 		System.out.println(Constants.univs[univKey].getName()+" 흥미로운 자료 업로드 완료.");
-		
 		
 	}
 	

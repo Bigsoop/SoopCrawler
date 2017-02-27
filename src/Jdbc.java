@@ -235,6 +235,7 @@ public class Jdbc {
 	 *  학교별 흥미도로 정렬한 상위 몇개의 글들을 DB로부터 받아와
 	 *  Article의 ArrayList 형태로 반환합니다. 
 	 *  <p> DB상의 'articles'테이블에서 가져와 반환합니다.
+	 *  <p> 최근 30일동안 일정수준넘은 상위 n개.
 	 * @param univKey
 	 * 		대상 학교번호.
 	 * @param limitNumber
@@ -253,11 +254,12 @@ public class Jdbc {
 			st = con.createStatement();
 			String query = 
 					  "SELECT * "
-					+ "FROM articles "
+					+ "FROM articles,interestingArticles "
 					+ "WHERE univKey = " + univKey
 					+ " and interesting > "+ Constants.interestingMin
-					+ " ORDER BY interesting DESC "
-					+ "LIMIT "+limitNumber
+					+ " and date(created_time) >= date(subdate(NOW(), INTERVAL 30 DAY))"
+					+ " ORDER BY interesting DESC"
+					+ " LIMIT "+limitNumber
 					+ ";";
 							
 			rs = st.executeQuery(query);
@@ -281,6 +283,63 @@ public class Jdbc {
 		}
 		return articles;
 	}
+	
+	/**
+	 *  학교별 흥미도로 정렬한 상위 몇개의 글들을 DB로부터 받아와
+	 *  Article의 ArrayList 형태로 반환합니다. 
+	 *  <p> 개수기준이 아니고 일정수준 넘은거 가져옴.
+	 *  <p> DB상의 'articles'테이블에서 가져와 반환합니다.
+	 * @param univKey
+	 * 		대상 학교번호.
+	 * 
+	 * @return
+	 * 		Article의 ArrayList형태로  반환.
+	 */
+	public ArrayList<Article> fetchInterestingArticles(int univKey){
+		ArrayList<Article> articles = new ArrayList<Article>();
+		try {			
+			Class.forName("com.mysql.jdbc.Driver");
+			con = DriverManager.getConnection(Constants.DBurl,Constants.DBid,Constants.DBpw);			
+			
+			java.sql.Statement st = null;
+			ResultSet rs = null;
+			st = con.createStatement();
+			String query = 
+					  "SELECT * "
+					+ "FROM articles "
+					+ "WHERE univKey = " + univKey
+					+ " and interesting > "+ Constants.interestingMin
+//					+ " and date(created_time) >= date(subdate(NOW(), INTERVAL 30 DAY))"
+					+ " and id not in (select id from interestingArticles)"
+//					+ " ORDER BY interesting DESC"
+//					+ " LIMIT "+50
+					+ ";";
+							
+			rs = st.executeQuery(query);
+			while (rs.next()) {
+				Article article = new Article(
+						rs.getString("id"),
+						rs.getString("created_time"),
+						univKey,
+						rs.getInt("interesting"),
+						rs.getInt("likes"),
+						rs.getInt("comments"),
+						rs.getInt("shares")
+						);
+				articles.add(article);
+			}
+		} catch (SQLException sqex) {
+			System.out.println("SQLException: " + sqex.getMessage());
+			System.out.println("SQLState: " + sqex.getSQLState());
+		}catch(Exception e){ 
+			System.out.println(e.toString()); 
+		}
+		return articles;
+	}
+	
+	
+	
+	
 	/**
 	 * 흥미로운 글들을 DB에 저장합니다. 
 	 * <p> interestingArticles 테이블에 저장합니다. 
