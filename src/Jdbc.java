@@ -13,7 +13,7 @@ public class Jdbc {
 	
 	
 	/**
-	 * DBÁ¢±Ù¿¡ ÇÊ¿äÇÑ Á¤º¸¸¦ ÃÊ±âÈ­ÇÏ´Â »ı¼ºÀÚÀÔ´Ï´Ù.
+	 * DBì ‘ê·¼ì— í•„ìš”í•œ ì •ë³´ë¥¼ ì´ˆê¸°í™”í•˜ëŠ” ìƒì„±ìì…ë‹ˆë‹¤.
 	 */
 	public Jdbc(String url, String id, String pw){
 		this.url = url;
@@ -44,11 +44,11 @@ public class Jdbc {
 	
 	
 	/**
-	 * ÃÖ±Ù ¾÷µ¥ÀÌÆ® ÀÏ½Ã¸¦ DB·ÎºÎÅÍ ºÒ·¯¿É´Ï´Ù.
+	 * ìµœê·¼ ì—…ë°ì´íŠ¸ ì¼ì‹œë¥¼ DBë¡œë¶€í„° ë¶ˆëŸ¬ì˜µë‹ˆë‹¤.
 	 * @param univKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£.  <p>¾î´À ÇĞ±³ÀÇ ¾÷µ¥ÀÌÆ® ÀÏ½Ã¸¦ ¹Ş¾Æ¿ÃÁö ÁöÁ¤ÇÕ´Ï´Ù.  
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸.  <p>ì–´ëŠ í•™êµì˜ ì—…ë°ì´íŠ¸ ì¼ì‹œë¥¼ ë°›ì•„ì˜¬ì§€ ì§€ì •í•©ë‹ˆë‹¤.  
 	 * @return 
-	 * 		ÃÖ±Ù ¾÷µ¥ÀÌÆ® ÀÏ½Ã¸¦ StringÇüÅÂ·Î ¹İÈ¯ÇÕ´Ï´Ù.<p> 
+	 * 		ìµœê·¼ ì—…ë°ì´íŠ¸ ì¼ì‹œë¥¼ Stringí˜•íƒœë¡œ ë°˜í™˜í•©ë‹ˆë‹¤.<p> 
 	 */
 	public String getRecentUpdate(int univKey){
 		String recentUpdate = null;
@@ -79,35 +79,48 @@ public class Jdbc {
 	
 	
 	/**
-	 *  ÃÖ±Ù ¾÷µ¥ÀÌÆ® ÀÏ½Ã¸¦ ÀÎÀÚ·Î ¹Ş¾Æ DB¿¡ ÀúÀåÇÕ´Ï´Ù.
+	 *  ìµœê·¼ ì—…ë°ì´íŠ¸ ì¼ì‹œë¥¼ ì¸ìë¡œ ë°›ì•„ DBì— ì €ì¥í•©ë‹ˆë‹¤.
 	 * @param dateString
-	 * 		ÀúÀåÇÒ ÀÏ½Ã. ÀúÀå/°ü¸®ÀÇ ÆíÀÇ¸¦ À§ÇØ 'yyyy-MM-dd HH:mm:ss'ÇüÅÂÀÇ StringÀ¸·Î ¹Ş¾Æ¿É´Ï´Ù.
+	 * 		ì €ì¥í•  ì¼ì‹œ. ì €ì¥/ê´€ë¦¬ì˜ í¸ì˜ë¥¼ ìœ„í•´ 'yyyy-MM-dd HH:mm:ss'í˜•íƒœì˜ Stringìœ¼ë¡œ ë°›ì•„ì˜µë‹ˆë‹¤.
 	 * @param univKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£.
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸.
 	 */
 	public void setRecentUpdate(String dateString, int univKey){
 		if (getRecentUpdate(univKey).equals(Constants.defaultRecentUpdate))
-			updateQuery("INSERT INTO recentUpdates(time,univKey) values('" + dateString + "',"+univKey+");");
+			
+			updateQuery("INSERT INTO recentUpdates(time,univKey) values(CONVERT_TZ('" + dateString + "','+0:00','+9:00'),"+univKey+");");
 		else
-			updateQuery("UPDATE recentUpdates SET time='"+dateString+"', univKey="+univKey+" WHERE univKey="+univKey+";");
+			updateQuery("UPDATE recentUpdates SET time=CONVERT_TZ('"+dateString+"','+0:00','+9:00'), univKey="+univKey+" WHERE univKey="+univKey+";");
+	}
+	/**
+	 *  ìµœê·¼ ì—…ë°ì´íŠ¸ ì¼ì‹œë¥¼ í˜„ì¬ì‹œê°„ìœ¼ë¡œí•˜ì—¬ DBì— ì €ì¥í•©ë‹ˆë‹¤.
+	 * @param univKey
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸.
+	 */
+	public void setRecentUpdate(int univKey){
+		if (getRecentUpdate(univKey).equals(Constants.defaultRecentUpdate))
+			updateQuery("INSERT INTO recentUpdates(time,univKey) values(CONVERT_TZ(NOW(),'+0:00','+9:00'),"+univKey+");");
+		else
+			updateQuery("UPDATE recentUpdates SET time=CONVERT_TZ(NOW(),'+0:00','+9:00'), univKey="+univKey+" WHERE univKey="+univKey+";");
 	}
 	
 	public void setUpdate(String work){
-		updateQuery("INSERT INTO updates(time,work) values(NOW(),'"+work+"');");		
+		updateQuery("INSERT INTO updates(time,work) values(CONVERT_TZ(NOW(),'+0:00','+9:00'),'"+work+"');");		
 	}
 	
 	/**
-	 * »õ ±ÛµéÀÇ °£´ÜÇÑ Á¤º¸¸¦ DB¿¡ ÀúÀåÇÕ´Ï´Ù.<p>
-	 * ¿©±â¿¡¼­´Â id¿Í ÀÛ¼º ÀÏ½Ã, ÇĞ±³¸í¸¸ ÀúÀåÇÕ´Ï´Ù.
+	 * ìƒˆ ê¸€ë“¤ì˜ ê°„ë‹¨í•œ ì •ë³´ë¥¼ DBì— ì €ì¥í•©ë‹ˆë‹¤.<p>
+	 * ì—¬ê¸°ì—ì„œëŠ” idì™€ ì‘ì„± ì¼ì‹œ, í•™êµëª…ë§Œ ì €ì¥í•©ë‹ˆë‹¤.
 	 * @param createdTime
-	 * 		ÀÛ¼º ÀÏ½Ã.
+	 * 		ì‘ì„± ì¼ì‹œ.
 	 */
 	public void writeSimpleInformations(ArrayList<Article> articles){
 		for(Article article : articles){
 			updateQuery(
 					"INSERT INTO articles(id,created_time,univKey) "+
-					"VALUES('" + article.getId() + "','" +
-								 article.getCreatedTime() + "', " +
+					"VALUES('" + article.getId() + "'," +
+								"CONVERT_TZ('"+
+								 article.getCreatedTime() + "','+0:00','+9:00'), " +
 								 article.getUnivKey() + ");"
 						);	
 		}
@@ -118,11 +131,11 @@ public class Jdbc {
 	
 	
 	/**
-	 * ÇĞ±³ÀÌ¸§¿¡ ÇØ´çÇÏ´Â ¸ğµç ±ÛÀÇ id¸¸À» DBÀÇ ÇØ´ç Å×ÀÌºí·ÎºÎÅÍ ºÒ·¯¿É´Ï´Ù.
+	 * í•™êµì´ë¦„ì— í•´ë‹¹í•˜ëŠ” ëª¨ë“  ê¸€ì˜ idë§Œì„ DBì˜ í•´ë‹¹ í…Œì´ë¸”ë¡œë¶€í„° ë¶ˆëŸ¬ì˜µë‹ˆë‹¤.
 	 * @param univKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£.
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸.
 	 * @param tableName
-	 * 		DB»óÀÇ Å×ÀÌºí ¸í.
+	 * 		DBìƒì˜ í…Œì´ë¸” ëª….
 	 */
 	public ArrayList<String> readIds(int univKey,String tableName){
 		ArrayList<String> list = new ArrayList<String>();
@@ -133,10 +146,10 @@ public class Jdbc {
 			java.sql.Statement st = null;
 			ResultSet rs = null;
 			st = con.createStatement();
-//			String Áö±İº¸´Ù6°³¿ùÀü = Constants.fm.format(new Date()) new Date());
+//			String ì§€ê¸ˆë³´ë‹¤6ê°œì›”ì „ = Constants.fm.format(new Date()) new Date());
 			rs = st.executeQuery("SELECT id FROM "+tableName+
 					" WHERE univKey=" + univKey + ";"); 
-//					" and unix_timestamp(created_time) > unix_timestamp('"+Áö±İº¸´Ù6°³¿ùÀü+"') ;"); 
+//					" and unix_timestamp(created_time) > unix_timestamp('"+ì§€ê¸ˆë³´ë‹¤6ê°œì›”ì „+"') ;"); 
 			while(rs.next()) {
 				list.add(rs.getString(1));
 			}
@@ -151,13 +164,13 @@ public class Jdbc {
 	
 	
 	/**
-	 * ÇĞ±³ÀÌ¸§¿¡ ÇØ´çÇÏ´Â ¸ğµç ±ÛÀ» DBÀÇ ÇØ´ç Å×ÀÌºí·ÎºÎÅÍ ºÒ·¯¿É´Ï´Ù.
+	 * í•™êµì´ë¦„ì— í•´ë‹¹í•˜ëŠ” ëª¨ë“  ê¸€ì„ DBì˜ í•´ë‹¹ í…Œì´ë¸”ë¡œë¶€í„° ë¶ˆëŸ¬ì˜µë‹ˆë‹¤.
 	 * @param univKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£.
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸.
 	 * @param tableName
-	 * 		DB»óÀÇ Å×ÀÌºí ¸í.
+	 * 		DBìƒì˜ í…Œì´ë¸” ëª….
 	 * @return
-	 * 		ArrayList<Article>ÇüÅÂ·Î ¹İÈ¯ÇÕ´Ï´Ù.
+	 * 		ArrayList<Article>í˜•íƒœë¡œ ë°˜í™˜í•©ë‹ˆë‹¤.
 	 */
 	public ArrayList<Article> readArticles(int univKey,String tableName){
 		ArrayList<Article> articles = new ArrayList<Article>();
@@ -193,9 +206,9 @@ public class Jdbc {
 	
 	
 	/**
-	 * ÀÎÀÚ·Î ¹ŞÀº °Ô½Ã±Û ¸®½ºÆ® ³»ÀÇ ¸ğµç °Ô½Ã±ÛÀÇ ÁÁ¾Æ¿ä,´ñ±Û,°øÀ¯ È½¼ö¸¦ DB¿¡ ¾÷µ¥ÀÌÆ®ÇÕ´Ï´Ù.<p>
+	 * ì¸ìë¡œ ë°›ì€ ê²Œì‹œê¸€ ë¦¬ìŠ¤íŠ¸ ë‚´ì˜ ëª¨ë“  ê²Œì‹œê¸€ì˜ ì¢‹ì•„ìš”,ëŒ“ê¸€,ê³µìœ  íšŸìˆ˜ë¥¼ DBì— ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.<p>
 	 * @param articles
-	 * 		°Ô½Ã±ÛÀ» ArrayList·Î ¹Ş¾Æ¿É´Ï´Ù.
+	 * 		ê²Œì‹œê¸€ì„ ArrayListë¡œ ë°›ì•„ì˜µë‹ˆë‹¤.
 	 */
 	public void writeInterestInformations(ArrayList<Article> articles){
 		for(Article article : articles){
@@ -203,12 +216,19 @@ public class Jdbc {
 			int comments = article.getComments();
 			int shares = article.getShares();
 			int interesting = likes*3+comments*2+shares*5;
-				updateQuery("UPDATE articles SET " +
-						    "likes="+likes+", "+
-						    "comments="+comments+", "+
-						    "shares="+shares+", "+
-						    "interesting="+interesting+
-						    " WHERE id='"+article.getId()+"';");	
+			updateQuery("UPDATE articles SET " +
+				    "likes="+likes+", "+
+				    "comments="+comments+", "+
+				    "shares="+shares+", "+
+				    "interesting="+interesting+
+				    " WHERE id='"+article.getId()+"';");
+			
+			updateQuery("UPDATE interestingArticles SET " +
+				    "likes="+likes+", "+
+				    "comments="+comments+", "+
+				    "shares="+shares+", "+
+				    "interesting="+interesting+
+				    " WHERE id='"+article.getId()+"';");	
 		}
 		
 	}
@@ -232,16 +252,16 @@ public class Jdbc {
 	
 	
 	/**
-	 *  ÇĞ±³º° Èï¹Ìµµ·Î Á¤·ÄÇÑ »óÀ§ ¸î°³ÀÇ ±ÛµéÀ» DB·ÎºÎÅÍ ¹Ş¾Æ¿Í
-	 *  ArticleÀÇ ArrayList ÇüÅÂ·Î ¹İÈ¯ÇÕ´Ï´Ù. 
-	 *  <p> DB»óÀÇ 'articles'Å×ÀÌºí¿¡¼­ °¡Á®¿Í ¹İÈ¯ÇÕ´Ï´Ù.
-	 *  <p> ÃÖ±Ù 30ÀÏµ¿¾È ÀÏÁ¤¼öÁØ³ÑÀº »óÀ§ n°³.
+	 *  í•™êµë³„ í¥ë¯¸ë„ë¡œ ì •ë ¬í•œ ìƒìœ„ ëª‡ê°œì˜ ê¸€ë“¤ì„ DBë¡œë¶€í„° ë°›ì•„ì™€
+	 *  Articleì˜ ArrayList í˜•íƒœë¡œ ë°˜í™˜í•©ë‹ˆë‹¤. 
+	 *  <p> DBìƒì˜ 'articles'í…Œì´ë¸”ì—ì„œ ê°€ì ¸ì™€ ë°˜í™˜í•©ë‹ˆë‹¤.
+	 *  <p> ìµœê·¼ 30ì¼ë™ì•ˆ ì¼ì •ìˆ˜ì¤€ë„˜ì€ ìƒìœ„ nê°œ.
 	 * @param univKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£.
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸.
 	 * @param limitNumber
-	 * 		±Û ¼ö Á¦ÇÑ.
+	 * 		ê¸€ ìˆ˜ ì œí•œ.
 	 * @return
-	 * 		ArticleÀÇ ArrayListÇüÅÂ·Î  ¹İÈ¯.
+	 * 		Articleì˜ ArrayListí˜•íƒœë¡œ  ë°˜í™˜.
 	 */
 	public ArrayList<Article> fetchInterestingArticles(int univKey, int limitNumber){
 		ArrayList<Article> articles = new ArrayList<Article>();
@@ -254,7 +274,7 @@ public class Jdbc {
 			st = con.createStatement();
 			String query = 
 					  "SELECT * "
-					+ "FROM articles,interestingArticles "
+					+ "FROM articles "
 					+ "WHERE univKey = " + univKey
 					+ " and interesting > "+ Constants.interestingMin
 					+ " and date(created_time) >= date(subdate(NOW(), INTERVAL 30 DAY))"
@@ -285,15 +305,15 @@ public class Jdbc {
 	}
 	
 	/**
-	 *  ÇĞ±³º° Èï¹Ìµµ·Î Á¤·ÄÇÑ »óÀ§ ¸î°³ÀÇ ±ÛµéÀ» DB·ÎºÎÅÍ ¹Ş¾Æ¿Í
-	 *  ArticleÀÇ ArrayList ÇüÅÂ·Î ¹İÈ¯ÇÕ´Ï´Ù. 
-	 *  <p> °³¼ö±âÁØÀÌ ¾Æ´Ï°í ÀÏÁ¤¼öÁØ ³ÑÀº°Å °¡Á®¿È.
-	 *  <p> DB»óÀÇ 'articles'Å×ÀÌºí¿¡¼­ °¡Á®¿Í ¹İÈ¯ÇÕ´Ï´Ù.
+	 *  í•™êµë³„ í¥ë¯¸ë„ë¡œ ì •ë ¬í•œ ìƒìœ„ ëª‡ê°œì˜ ê¸€ë“¤ì„ DBë¡œë¶€í„° ë°›ì•„ì™€
+	 *  Articleì˜ ArrayList í˜•íƒœë¡œ ë°˜í™˜í•©ë‹ˆë‹¤. 
+	 *  <p> ê°œìˆ˜ê¸°ì¤€ì´ ì•„ë‹ˆê³  ì¼ì •ìˆ˜ì¤€ ë„˜ì€ê±° ê°€ì ¸ì˜´.
+	 *  <p> DBìƒì˜ 'articles'í…Œì´ë¸”ì—ì„œ ê°€ì ¸ì™€ ë°˜í™˜í•©ë‹ˆë‹¤.
 	 * @param univKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£.
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸.
 	 * 
 	 * @return
-	 * 		ArticleÀÇ ArrayListÇüÅÂ·Î  ¹İÈ¯.
+	 * 		Articleì˜ ArrayListí˜•íƒœë¡œ  ë°˜í™˜.
 	 */
 	public ArrayList<Article> fetchInterestingArticles(int univKey){
 		ArrayList<Article> articles = new ArrayList<Article>();
@@ -341,10 +361,10 @@ public class Jdbc {
 	
 	
 	/**
-	 * Èï¹Ì·Î¿î ±ÛµéÀ» DB¿¡ ÀúÀåÇÕ´Ï´Ù. 
-	 * <p> interestingArticles Å×ÀÌºí¿¡ ÀúÀåÇÕ´Ï´Ù. 
+	 * í¥ë¯¸ë¡œìš´ ê¸€ë“¤ì„ DBì— ì €ì¥í•©ë‹ˆë‹¤. 
+	 * <p> interestingArticles í…Œì´ë¸”ì— ì €ì¥í•©ë‹ˆë‹¤. 
 	 * @param articles
-	 * 		ÀúÀåÇÒ ±ÛÀº ArticleÀÇ ArrayList(articles)ÇüÅÂ·Î ÁöÁ¤ÇÕ´Ï´Ù.
+	 * 		ì €ì¥í•  ê¸€ì€ Articleì˜ ArrayList(articles)í˜•íƒœë¡œ ì§€ì •í•©ë‹ˆë‹¤.
 	 */
 			
 	public void writeInterestingArticles(ArrayList<Article> articles){
@@ -352,19 +372,20 @@ public class Jdbc {
 		for (Article article : articles){
 			String message = article.getMessage();
 			if (message!=null){
-				message = message.replaceAll("\'", "¡®");//¡®
-				message = message.replaceAll("\"", "\\¡®¡®");
+				message = message.replaceAll("\'", "â€˜");//â€˜
+				message = message.replaceAll("\"", "\\â€˜â€˜");
 				
 			}else
-				message = "³»¿ëÀÌ ¾ø´Â ±ÛÀÔ´Ï´Ù.";
+				message = "ë‚´ìš©ì´ ì—†ëŠ” ê¸€ì…ë‹ˆë‹¤.";
 			updateQuery(
 					"INSERT INTO interestingArticles(id,likes,comments,shares,message,created_time,interesting,univKey) "+
 					"VALUES('" + article.getId() +"', "
 							+ article.getLikes() +", "
 							+ article.getComments() +", "
 							+ article.getShares() +", '"
-							+ message +"', '"
-							+ article.getCreatedTime() +"', "
+							+ message +"', "
+							+ "CONVERT_TZ('"
+							+ article.getCreatedTime() +"','+0:00','+9:00'), "
 							+ article.getInteresting() +", "
 							+ article.getUnivKey() +");"
 						);
@@ -374,9 +395,9 @@ public class Jdbc {
 	
 	
 	/**
-	 * DB¿¡ select¿äÃ»À» Á¦¿ÜÇÑ, update,delete,insert¿äÃ»ÀÇ SQL¹®À» Àü´ŞÇÕ´Ï´Ù. 
+	 * DBì— selectìš”ì²­ì„ ì œì™¸í•œ, update,delete,insertìš”ì²­ì˜ SQLë¬¸ì„ ì „ë‹¬í•©ë‹ˆë‹¤. 
 	 * @param q
-	 * 		String ÇüÅÂÀÇ SQL¹®ÀÔ´Ï´Ù.	  
+	 * 		String í˜•íƒœì˜ SQLë¬¸ì…ë‹ˆë‹¤.	  
 	 * 		
 	 */
 	private void updateQuery(String q){
@@ -398,6 +419,6 @@ public class Jdbc {
 }
 
 
-// write´Â DB¿¡ ³»¿ëµéÀ» ÀÜ¶à ¾²´Â°Å¶ó¼­ write.
-// read´Â DB¿¡¼­ ³»¿ëµéÀ» ÀÜ¶à ÀĞ´Â°Å¶ó¼­ read.
-// DBÁ¢±ÙÀÌÁö¸¸ get,setÀº (´ëÇĞº°) ´ÜÀÏ °ª ¼³Á¤ÀÌ¶ó get,setÀ¸·ÎÇßÀ½.  
+// writeëŠ” DBì— ë‚´ìš©ë“¤ì„ ì”ëœ© ì“°ëŠ”ê±°ë¼ì„œ write.
+// readëŠ” DBì—ì„œ ë‚´ìš©ë“¤ì„ ì”ëœ© ì½ëŠ”ê±°ë¼ì„œ read.
+// DBì ‘ê·¼ì´ì§€ë§Œ get,setì€ (ëŒ€í•™ë³„) ë‹¨ì¼ ê°’ ì„¤ì •ì´ë¼ get,setìœ¼ë¡œí–ˆìŒ.  
