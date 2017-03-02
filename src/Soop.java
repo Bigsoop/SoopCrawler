@@ -155,22 +155,20 @@ public class Soop {
 			System.out.println("현재 새 글 " + numberOfFinished + "개 받아옴..."); // (약) 100개 단위로 출력(접근권한없는글 누락될수있음.)
 			for (Post post : myFeedConnectionPage){
 				if (post != null){			
-					
 					Date recentUpdate = null;
 					try {
 						recentUpdate = Constants.fm.parse(recentUpdateString);
 					} catch (ParseException e) {
 						e.printStackTrace();
-						System.err.println("시간파싱에러");
+						System.err.println("준구야좃됫어");
 					}
 					if (numberOfFinished == this.limit || // 동작 이상으로 너무 많이 받았거나 
 						post.getCreatedTime().compareTo(recentUpdate) == -1){ // 최근 업데이트보다 이전에 올라온 글이면 그만 받기.
-						//      이글의cretedTime(이전) < recentUpdate
+						//      이글의cretedTime < recentUpdate
 						break pLoop;
 					}
-					else{ //	이글의createdTime >= recentUpdate(이전)
-//						System.out.println(Constants.fm2.format(post.getCreatedTime()));
-						Article article = new Article(post.getId(),Constants.fm2.format(post.getCreatedTime()),univKey);
+					else{ //	이글의createdTime >= recentUpdate
+						Article article = new Article(post.getId(),Constants.fm.format(post.getCreatedTime()),univKey);
 						articles.add(article);
 						numberOfFinished++;
 						
@@ -182,7 +180,7 @@ public class Soop {
 		System.out.println("새 글 총 " + numberOfFinished + "개 받아옴!");
 		System.out.println("받아온 자료를 DB에 전송하는중...");
 		db.writeSimpleInformations(articles); // 기본정보들을 DB에 저장.
-		db.setRecentUpdate(univKey);
+		db.setRecentUpdate(Constants.fm.format(new Date()),univKey);
 		System.out.println(Constants.univs[univKey].getName() + " 새 글 총 " + numberOfFinished + "개 크롤링 완료!");
 		
 		System.out.println("새 글 DB전송 완료시각 : "+Constants.fm.format(new Date()));
@@ -226,8 +224,7 @@ public class Soop {
 						break pLoop;
 					}
 					else{ // cret <=DB읽or기본값
-						System.out.println(Constants.fm2.format(post.getCreatedTime()));
-						articles.add(new Article(post.getId(),Constants.fm2.format(post.getCreatedTime()),univKey));
+						articles.add(new Article(post.getId(),Constants.fm.format(post.getCreatedTime()),univKey));
 						numberOfFinished++;
 						
 					}
@@ -237,7 +234,7 @@ public class Soop {
 		System.out.println("새 글 총 " + numberOfFinished + "개 받아옴!");
 		System.out.println("받아온 자료를 DB에 전송하는중...");
 		db.writeSimpleInformations(articles); // 기본정보들을 DB에 저장.
-		db.setRecentUpdate(univKey);
+		db.setRecentUpdate(Constants.fm.format(new Date()),univKey);
 		System.out.println(Constants.univs[univKey].getName() + " 새 글 총 " + numberOfFinished + "개 크롤링 완료!");		
 				
 		
@@ -326,7 +323,7 @@ public class Soop {
 		
 		
 		
-//		int numberOfFinished=0;		
+		int numberOfFinished=0;		
 		int sizeOfList = articles.size();
 		int quotient = (int) ( (sizeOfList-1) / 50)+1; 
 //		System.out.println(quotient);
@@ -353,7 +350,7 @@ public class Soop {
 				try{ 
 					String message = obj.getJsonObject(id).getString("message");
 					for(Article article : articles){					
-						if(article.getId().equals(id)){
+						if(article.getId()==id){
 							article.setMessage(message);
 						}
 						
