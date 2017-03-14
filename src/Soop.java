@@ -311,8 +311,6 @@ public class Soop {
 						shares = obj.getJsonObject(id).getJsonObject("shares").getInt("count");
 					articles.add(new Article(id,likes,comments,shares,pictures)); 
 					
-					//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-					
 					
 					numberOfFinished++;				
 				}catch(Exception e){ 
@@ -372,15 +370,19 @@ public class Soop {
 			try{
 			 obj =  fbClient.fetchObjects(subIds,
 						JsonObject.class,
-						Parameter.with("fields", "message"));
+						Parameter.with("fields", "message,story"));
 			}
 			catch(IllegalArgumentException e){
 				System.err.println("빈 리스트 오류발생!");
 				
 			}
 			for(String id: subIds){
+				String message = "";
 				try{ 
-					String message = obj.getJsonObject(id).getString("message");
+					if (obj.getJsonObject(id).has("message"))
+						message = obj.getJsonObject(id).getString("message");
+					else if(obj.getJsonObject(id).has("story"))
+						message = obj.getJsonObject(id).getString("story");
 					for(Article article : articles){					
 						if(article.getId().equals(id)){
 							article.setMessage(message);
