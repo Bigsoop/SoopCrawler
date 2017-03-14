@@ -17,6 +17,7 @@ import com.restfb.FacebookClient.AccessToken;
 import com.restfb.Parameter;
 import com.restfb.Version;
 import com.restfb.exception.FacebookException;
+import com.restfb.json.JsonArray;
 import com.restfb.json.JsonObject;
 import com.restfb.types.Post;
 
@@ -30,7 +31,7 @@ public class Soop {
 
 	
 	/**
-	 * ¾×¼¼½ºÅäÅ«°ú ¾Û½ÃÅ©¸´ÄÚµå·Î fbClient¸¦ ÃÊ±âÈ­ÇÏ´Â »ı¼ºÀÚÀÔ´Ï´Ù.
+	 * ì•¡ì„¸ìŠ¤í† í°ê³¼ ì•±ì‹œí¬ë¦¿ì½”ë“œë¡œ fbClientë¥¼ ì´ˆê¸°í™”í•˜ëŠ” ìƒì„±ìì…ë‹ˆë‹¤.
 	 */
 	public Soop(String accessToken,String appSecret){
 		this.accessToken = accessToken;
@@ -40,7 +41,7 @@ public class Soop {
 	}
 
 	/**
-	 * ¾×¼¼½ºÅäÅ«À¸·Î fbClient¸¦ ÃÊ±âÈ­ÇÏ´Â »ı¼ºÀÚÀÔ´Ï´Ù.
+	 * ì•¡ì„¸ìŠ¤í† í°ìœ¼ë¡œ fbClientë¥¼ ì´ˆê¸°í™”í•˜ëŠ” ìƒì„±ìì…ë‹ˆë‹¤.
 	 */
 	public Soop(String accessToken){
 		this.accessToken = accessToken;
@@ -49,9 +50,9 @@ public class Soop {
 	}
 
 	/**
-	 * ¾×¼¼½º ÅäÅ«À» ¼öÁ¤ÇÕ´Ï´Ù.
+	 * ì•¡ì„¸ìŠ¤ í† í°ì„ ìˆ˜ì •í•©ë‹ˆë‹¤.
 	 * @param accessToken
-	 *  	¹Ù²Ù¾î ÁÙ »õ·Î¿î ¾×¼¼½º ÅäÅ«ÀÔ´Ï´Ù.<p>
+	 *  	ë°”ê¾¸ì–´ ì¤„ ìƒˆë¡œìš´ ì•¡ì„¸ìŠ¤ í† í°ì…ë‹ˆë‹¤.<p>
 	 */
 	public void changeAccessToken(String accessToken){
 		this.accessToken = accessToken;
@@ -62,7 +63,7 @@ public class Soop {
 	
 
 	/**
-	 * ÇöÀç±Û, ÇöÀç ÁÁ´ñ°øÀ» °¡Áö°í Èï¹Ì·Î¿î±Û ¸¸À» Ãß°¡ÇÏ´Â ÀÛ¾÷À» ¼öÇàÇÕ´Ï´Ù. 
+	 * í˜„ì¬ê¸€, í˜„ì¬ ì¢‹ëŒ“ê³µì„ ê°€ì§€ê³  í¥ë¯¸ë¡œìš´ê¸€ ë§Œì„ ì¶”ê°€í•˜ëŠ” ì‘ì—…ì„ ìˆ˜í–‰í•©ë‹ˆë‹¤. 
 	 * 
 	*/
 	public int updateInterestingArticles() {		
@@ -70,28 +71,29 @@ public class Soop {
 		for(int i=0;i<Constants.univs.length;i++){        	
 			int univKey = i;
 			System.out.println("==========================================");							    
-			System.out.println("<"+Constants.univs[univKey].getName() + " Èï¹Ì·Î¿î ±Û °¡Á®¿À±â ½ÃÀÛ> ["+(numberOfUnivs+1)+"/"+(Constants.univs.length)+"]");
+			System.out.println("<"+Constants.univs[univKey].getName() + " í¥ë¯¸ë¡œìš´ ê¸€ ê°€ì ¸ì˜¤ê¸° ì‹œì‘> ["+(numberOfUnivs+1)+"/"+(Constants.univs.length)+"]");
 			addInterestingArticles(univKey,Constants.interestingLimit);
 			numberOfUnivs++;
 		}
-		db.setUpdate("Èï¹Ì·Î¿î±Û Ãß°¡ ÀÛ¾÷");
+		db.setUpdate("í¥ë¯¸ë¡œìš´ê¸€ ì¶”ê°€ ì‘ì—…");
 		return numberOfUnivs;
 
 	}
 
 	/**
-	 * ÁÖ±âÀûÀ¸·Î Å©·Ñ¸µÀ» ¼öÇàÇÒ °æ¿ì¿¡ ±âº»ÀûÀ¸·Î ½ÇÇàÇÕ´Ï´Ù.<p>
-	 * ¸ğµç ÇĞ±³¿¡ ´ëÇØ  ÃÖ±Ù ¾÷µ¥ÀÌÆ® ½ÃÁ¡ ÀÌÈÄÀÇ »õ·Î¿î ±ÛÀ» ¹Ş¾Æ¿À°í, 
-	 * ÇöÀç±îÁö ¹Ş¾Æ¿Â ¸ğµç ±ÛµéÀÇ ÁÁ/´ñ/°ø ¼ö¸¦ ¾÷µ¥ÀÌÆ®ÇÕ´Ï´Ù.<p>
-	 * °¢ ÇĞ±³º°·Î »õ·Î¿î ±ÛÀÇ id¸¦ ¹Ş¾Æ¿Í ÀúÀåÇØµÎ°í, id¸¦ ±âÁØÀ¸·Î 'ÁÁ´ñ°ø+Èï¹ÌÁö¼ö'ÇÊµå¸¦ ³Ö¾îÁİ´Ï´Ù.
-	 * ±×¸®°í Èï¹ÌÁö¼ö¸¦ ¹ÙÅÁÀ¸·Î ÀÏÁ¤°³¼ö¸¦ »Ì¾Æ Èï¹Ì·Î¿î Å×ÀÌºí¿¡ Ãß°¡ÇÕ´Ï´Ù.
+	 * ì£¼ê¸°ì ìœ¼ë¡œ í¬ë¡¤ë§ì„ ìˆ˜í–‰í•  ê²½ìš°ì— ê¸°ë³¸ì ìœ¼ë¡œ ì‹¤í–‰í•©ë‹ˆë‹¤.<p>
+	 * ëª¨ë“  í•™êµì— ëŒ€í•´  ìµœê·¼ ì—…ë°ì´íŠ¸ ì‹œì  ì´í›„ì˜ ìƒˆë¡œìš´ ê¸€ì„ ë°›ì•„ì˜¤ê³ , 
+	 * í˜„ì¬ê¹Œì§€ ë°›ì•„ì˜¨ ëª¨ë“  ê¸€ë“¤ì˜ ì¢‹/ëŒ“/ê³µ ìˆ˜ë¥¼ ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.<p>
+	 * ê° í•™êµë³„ë¡œ ìƒˆë¡œìš´ ê¸€ì˜ idë¥¼ ë°›ì•„ì™€ ì €ì¥í•´ë‘ê³ , idë¥¼ ê¸°ì¤€ìœ¼ë¡œ 'ì¢‹ëŒ“ê³µ+í¥ë¯¸ì§€ìˆ˜'í•„ë“œë¥¼ ë„£ì–´ì¤ë‹ˆë‹¤.
+	 * ê·¸ë¦¬ê³  í¥ë¯¸ì§€ìˆ˜ë¥¼ ë°”íƒ•ìœ¼ë¡œ ì¼ì •ê°œìˆ˜ë¥¼ ë½‘ì•„ í¥ë¯¸ë¡œìš´ í…Œì´ë¸”ì— ì¶”ê°€í•©ë‹ˆë‹¤.
 	 */	
 	public int updateAll() {
+		db.setUpdate("ì¼ë°˜ ì‘ì—… ì‹œì‘");
 		int numberOfUnivs=0;
 		for(int i=0;i<Constants.univs.length;i++){        	
 			int univKey = i;
 			System.out.println("==========================================");							    
-			System.out.println("<"+Constants.univs[univKey].getName() + " Å©·Ñ¸µ ½ÃÀÛ> ["+(numberOfUnivs+1)+"/"+(Constants.univs.length)+"]");
+			System.out.println("<"+Constants.univs[univKey].getName() + " í¬ë¡¤ë§ ì‹œì‘> ["+(numberOfUnivs+1)+"/"+(Constants.univs.length)+"]");
 			getSimpleArticles(univKey);
 			getInterestInformations(univKey);
 			addInterestingArticles(univKey,Constants.interestingLimit);
@@ -99,27 +101,28 @@ public class Soop {
 		}
 //		updateResultTable();
 //		outPutLog();
-		db.setUpdate("ÀÏ¹İ ÀÛ¾÷");
+		db.setUpdate("ì¼ë°˜ ì‘ì—… ì™„ë£Œ");
 		db.closeConnection();
 		return numberOfUnivs;
 
 	}
 	/**
-	 * Æ¯Á¤ ½ÃÁ¡À» ±âÁØÀ¸·Î Å©·Ñ¸µÀ» ¼öÇàÇÒ °æ¿ì¿¡ ±âº»ÀûÀ¸·Î ½ÇÇàÇÕ´Ï´Ù.<p>
-	 * ¸¶Ä¡ ÃÖ±Ù ¾÷µ¥ÀÌÆ®ÀÏÀÚ°¡ ±×¶§ÀÎ°ÍÃ³·³ Å©·Ñ¸µÀ» ¼öÇàÇÕ´Ï´Ù.
+	 * íŠ¹ì • ì‹œì ì„ ê¸°ì¤€ìœ¼ë¡œ í¬ë¡¤ë§ì„ ìˆ˜í–‰í•  ê²½ìš°ì— ê¸°ë³¸ì ìœ¼ë¡œ ì‹¤í–‰í•©ë‹ˆë‹¤.<p>
+	 * ë§ˆì¹˜ ìµœê·¼ ì—…ë°ì´íŠ¸ì¼ìê°€ ê·¸ë•Œì¸ê²ƒì²˜ëŸ¼ í¬ë¡¤ë§ì„ ìˆ˜í–‰í•©ë‹ˆë‹¤.
 	 * <p>
-	 * ¸ğµç ÇĞ±³¿¡ ´ëÇØ  Á¤ÇØÁØ ½ÃÁ¡ ÀÌÈÄÀÇ »õ·Î¿î ±ÛÀ» ¹Ş¾Æ¿À°í, 
-	 * ÇöÀç±îÁö ¹Ş¾Æ¿Â ¸ğµç ±ÛµéÀÇ ÁÁ/´ñ/°ø ¼ö¸¦ ¾÷µ¥ÀÌÆ®ÇÕ´Ï´Ù.<p>
-	 * °¢ ÇĞ±³º°·Î »õ·Î¿î ±ÛÀÇ id¸¦ ¹Ş¾Æ¿Í ÀúÀåÇØµÎ°í, id¸¦ ±âÁØÀ¸·Î 'ÁÁ´ñ°ø+Èï¹ÌÁö¼ö'ÇÊµå¸¦ ³Ö¾îÁİ´Ï´Ù.
-	 * ±×¸®°í Èï¹ÌÁö¼ö¸¦ ¹ÙÅÁÀ¸·Î ÀÏÁ¤°³¼ö¸¦ »Ì¾Æ Èï¹Ì·Î¿î Å×ÀÌºí¿¡ Ãß°¡ÇÕ´Ï´Ù.
+	 * ëª¨ë“  í•™êµì— ëŒ€í•´  ì •í•´ì¤€ ì‹œì  ì´í›„ì˜ ìƒˆë¡œìš´ ê¸€ì„ ë°›ì•„ì˜¤ê³ , 
+	 * í˜„ì¬ê¹Œì§€ ë°›ì•„ì˜¨ ëª¨ë“  ê¸€ë“¤ì˜ ì¢‹/ëŒ“/ê³µ ìˆ˜ë¥¼ ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.<p>
+	 * ê° í•™êµë³„ë¡œ ìƒˆë¡œìš´ ê¸€ì˜ idë¥¼ ë°›ì•„ì™€ ì €ì¥í•´ë‘ê³ , idë¥¼ ê¸°ì¤€ìœ¼ë¡œ 'ì¢‹ëŒ“ê³µ+í¥ë¯¸ì§€ìˆ˜'í•„ë“œë¥¼ ë„£ì–´ì¤ë‹ˆë‹¤.
+	 * ê·¸ë¦¬ê³  í¥ë¯¸ì§€ìˆ˜ë¥¼ ë°”íƒ•ìœ¼ë¡œ ì¼ì •ê°œìˆ˜ë¥¼ ë½‘ì•„ í¥ë¯¸ë¡œìš´ í…Œì´ë¸”ì— ì¶”ê°€í•©ë‹ˆë‹¤.
 	 * <p>
 	 */	
 	public int updateAll(String criteriorDateString) {
+		db.setUpdate("íŠ¹ì •ì‹œê°„ê¸°ì¤€ ì¼ë°˜ ì‘ì—… ì‹œì‘");		
 		int numberOfUnivs=0;
 		for(int i=0;i<Constants.univs.length;i++){        	
 			int univKey = i;
 			System.out.println("==========================================");    		    
-			System.out.println("<"+Constants.univs[univKey].getName() + " Å©·Ñ¸µ ½ÃÀÛ> ["+(numberOfUnivs+1)+"/"+(Constants.univs.length)+"]");
+			System.out.println("<"+Constants.univs[univKey].getName() + " í¬ë¡¤ë§ ì‹œì‘> ["+(numberOfUnivs+1)+"/"+(Constants.univs.length)+"]");
 			getSimpleArticles(univKey,criteriorDateString);
 			getInterestInformations(univKey);
 			addInterestingArticles(univKey,Constants.interestingLimit);
@@ -127,48 +130,50 @@ public class Soop {
 		}
 //		updateResultTable();
 		db.closeConnection();
-		db.setUpdate("Æ¯Á¤½Ã°£±âÁØ ÀÏ¹İ ÀÛ¾÷");
+		db.setUpdate("íŠ¹ì •ì‹œê°„ê¸°ì¤€ ì¼ë°˜ ì‘ì—… ì™„ë£Œ");
 		return numberOfUnivs;
 	}
 	
 	
 	/**
-	 * ÇØ´ç ÇĞ±³ÀÇ »õ·Î¿î ±ÛÀ» ÀÏºÎ ÇÊ¼öÁ¤º¸¸¸ ¹Ş¾Æ¿É´Ï´Ù.<p>
-	 * °¢ ÇĞ±³º° ÃÖ±Ù ¾÷µ¥ÀÌÆ® ³¯Â¥ ÀÌÈÄ¿¡ ÀÛ¼ºµÈ ±ÛÀÇ id, ÀÛ¼º ÀÏ½Ã¸¦ ¹Ş¾Æ¿Í DB¿¡ ÀúÀåÇÕ´Ï´Ù. 
+	 * í•´ë‹¹ í•™êµì˜ ìƒˆë¡œìš´ ê¸€ì„ ì¼ë¶€ í•„ìˆ˜ì •ë³´ë§Œ ë°›ì•„ì˜µë‹ˆë‹¤.<p>
+	 * ê° í•™êµë³„ ìµœê·¼ ì—…ë°ì´íŠ¸ ë‚ ì§œ ì´í›„ì— ì‘ì„±ëœ ê¸€ì˜ id, ì‘ì„± ì¼ì‹œë¥¼ ë°›ì•„ì™€ DBì— ì €ì¥í•©ë‹ˆë‹¤. 
 	 * @param univKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£. <p>¾î´À ÇĞ±³ÀÇ ±ÛÀ» ¹Ş¾Æ¿ÃÁö ¼³Á¤ÇÕ´Ï´Ù.
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸. <p>ì–´ëŠ í•™êµì˜ ê¸€ì„ ë°›ì•„ì˜¬ì§€ ì„¤ì •í•©ë‹ˆë‹¤.
 	 * <p>
 	 */	
 	private void getSimpleArticles(int univKey){
 		ArrayList<Article> articles = new ArrayList<Article>();
 		String recentUpdateString = db.getRecentUpdate(univKey);
-		System.out.println("ÀÌÀü(ÃÖ¼Ò±âÁØ) Å©·Ñ¸µ ½Ã°¢ : " + recentUpdateString);
+		System.out.println("ì´ì „(ìµœì†Œê¸°ì¤€) í¬ë¡¤ë§ ì‹œê° : " + recentUpdateString);
 		Connection<Post> feed;
 		feed = 
 				fbClient.fetchConnection(Constants.univs[univKey].getUrl() + "/posts", Post.class,
 						Parameter.with("limit", 100), Parameter.with("fields", "id,created_time"));
-					//	¿©±â¿¡¼­ ¹Ù·Î since Parameter·Î Àû¿ëÇÒ¼öµµÀÖÀ»±î?
-//		System.err.println("¾×¼¼½ºÅäÅ«!");
+					//	ì—¬ê¸°ì—ì„œ ë°”ë¡œ since Parameterë¡œ ì ìš©í• ìˆ˜ë„ìˆì„ê¹Œ?
+//		System.err.println("ì•¡ì„¸ìŠ¤í† í°!");
 		int numberOfFinished=0;
 		pLoop:
 		for (List<Post> myFeedConnectionPage : feed){
-			System.out.println("ÇöÀç »õ ±Û " + numberOfFinished + "°³ ¹Ş¾Æ¿È..."); // (¾à) 100°³ ´ÜÀ§·Î Ãâ·Â(Á¢±Ù±ÇÇÑ¾ø´Â±Û ´©¶ôµÉ¼öÀÖÀ½.)
+			System.out.println("í˜„ì¬ ìƒˆ ê¸€ " + numberOfFinished + "ê°œ ë°›ì•„ì˜´..."); // (ì•½) 100ê°œ ë‹¨ìœ„ë¡œ ì¶œë ¥(ì ‘ê·¼ê¶Œí•œì—†ëŠ”ê¸€ ëˆ„ë½ë ìˆ˜ìˆìŒ.)
 			for (Post post : myFeedConnectionPage){
 				if (post != null){			
+					
 					Date recentUpdate = null;
 					try {
 						recentUpdate = Constants.fm.parse(recentUpdateString);
 					} catch (ParseException e) {
 						e.printStackTrace();
-						System.err.println("ÁØ±¸¾ßÁ½µÌ¾î");
+						System.err.println("ì‹œê°„íŒŒì‹±ì—ëŸ¬");
 					}
-					if (numberOfFinished == this.limit || // µ¿ÀÛ ÀÌ»óÀ¸·Î ³Ê¹« ¸¹ÀÌ ¹Ş¾Ò°Å³ª 
-						post.getCreatedTime().compareTo(recentUpdate) == -1){ // ÃÖ±Ù ¾÷µ¥ÀÌÆ®º¸´Ù ÀÌÀü¿¡ ¿Ã¶ó¿Â ±ÛÀÌ¸é ±×¸¸ ¹Ş±â.
-						//      ÀÌ±ÛÀÇcretedTime < recentUpdate
+					if (numberOfFinished == this.limit || // ë™ì‘ ì´ìƒìœ¼ë¡œ ë„ˆë¬´ ë§ì´ ë°›ì•˜ê±°ë‚˜ 
+						post.getCreatedTime().compareTo(recentUpdate) == -1){ // ìµœê·¼ ì—…ë°ì´íŠ¸ë³´ë‹¤ ì´ì „ì— ì˜¬ë¼ì˜¨ ê¸€ì´ë©´ ê·¸ë§Œ ë°›ê¸°.
+						//      ì´ê¸€ì˜cretedTime(ì´ì „) < recentUpdate
 						break pLoop;
 					}
-					else{ //	ÀÌ±ÛÀÇcreatedTime >= recentUpdate
-						Article article = new Article(post.getId(),Constants.fm.format(post.getCreatedTime()),univKey);
+					else{ //	ì´ê¸€ì˜createdTime >= recentUpdate(ì´ì „)
+//						System.out.println(Constants.fm2.format(post.getCreatedTime()));
+						Article article = new Article(post.getId(),Constants.fm2.format(post.getCreatedTime()),univKey);
 						articles.add(article);
 						numberOfFinished++;
 						
@@ -177,39 +182,39 @@ public class Soop {
 			}
 		}
 		
-		System.out.println("»õ ±Û ÃÑ " + numberOfFinished + "°³ ¹Ş¾Æ¿È!");
-		System.out.println("¹Ş¾Æ¿Â ÀÚ·á¸¦ DB¿¡ Àü¼ÛÇÏ´ÂÁß...");
-		db.writeSimpleInformations(articles); // ±âº»Á¤º¸µéÀ» DB¿¡ ÀúÀå.
-		db.setRecentUpdate(Constants.fm.format(new Date()),univKey);
-		System.out.println(Constants.univs[univKey].getName() + " »õ ±Û ÃÑ " + numberOfFinished + "°³ Å©·Ñ¸µ ¿Ï·á!");
+		System.out.println("ìƒˆ ê¸€ ì´ " + numberOfFinished + "ê°œ ë°›ì•„ì˜´!");
+		System.out.println("ë°›ì•„ì˜¨ ìë£Œë¥¼ DBì— ì „ì†¡í•˜ëŠ”ì¤‘...");
+		db.writeSimpleInformations(articles); // ê¸°ë³¸ì •ë³´ë“¤ì„ DBì— ì €ì¥.
+		db.setRecentUpdate(univKey);
+		System.out.println(Constants.univs[univKey].getName() + " ìƒˆ ê¸€ ì´ " + numberOfFinished + "ê°œ í¬ë¡¤ë§ ì™„ë£Œ!");
 		
-		System.out.println("»õ ±Û DBÀü¼Û ¿Ï·á½Ã°¢ : "+Constants.fm.format(new Date()));
+		System.out.println("ìƒˆ ê¸€ DBì „ì†¡ ì™„ë£Œì‹œê° : "+Constants.fm.format(new Date()));
 		System.out.println("------------------------------------------");
 	}
 	
 	
 	
 	/**
-	 * ±âÁØ ÀÏ½Ã ÀÌÈÄÀÇ ÇØ´çÇĞ±³ÀÇ »õ·Î¿î ±ÛÀ» ¹Ş¾Æ¿É´Ï´Ù.<p>
-	 * »õ·Ó°Ô ÇĞ±³ Ãß°¡µÆÀ»¶§³ª ±âÅ¸ »óÈ² ¹ß»ı ½Ã, ÆÄ¶ó¹ÌÅÍ¸¦ ÅëÇØ ¼öµ¿À¸·Î 'Á÷Á¢ ¼³Á¤ÇØÁØ' ±âÁØ ÀÏ½Ã ÀÌÈÄ¿¡ ÀÛ¼ºµÈ ÇØ´ç ÇĞ±³ÀÇ ±Û id¸¦ DB¿¡ ÀúÀåÇÏ´Â ¸Ş¼ÒµåÀÔ´Ï´Ù. 
+	 * ê¸°ì¤€ ì¼ì‹œ ì´í›„ì˜ í•´ë‹¹í•™êµì˜ ìƒˆë¡œìš´ ê¸€ì„ ë°›ì•„ì˜µë‹ˆë‹¤.<p>
+	 * ìƒˆë¡­ê²Œ í•™êµ ì¶”ê°€ëì„ë•Œë‚˜ ê¸°íƒ€ ìƒí™© ë°œìƒ ì‹œ, íŒŒë¼ë¯¸í„°ë¥¼ í†µí•´ ìˆ˜ë™ìœ¼ë¡œ 'ì§ì ‘ ì„¤ì •í•´ì¤€' ê¸°ì¤€ ì¼ì‹œ ì´í›„ì— ì‘ì„±ëœ í•´ë‹¹ í•™êµì˜ ê¸€ idë¥¼ DBì— ì €ì¥í•˜ëŠ” ë©”ì†Œë“œì…ë‹ˆë‹¤. 
 	 * @param date
-	 * 		±âÁØ ÀÏ½Ã.  ¾î¶² ÀÏ½Ã ÀÌÈÄ¿¡ ÀÛ¼ºµÈ ±Û¸¸ ¹Ş¾Æ¿ÃÁö ¼³Á¤ÇÕ´Ï´Ù.
+	 * 		ê¸°ì¤€ ì¼ì‹œ.  ì–´ë–¤ ì¼ì‹œ ì´í›„ì— ì‘ì„±ëœ ê¸€ë§Œ ë°›ì•„ì˜¬ì§€ ì„¤ì •í•©ë‹ˆë‹¤.
 	 * @param univKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£. ¾î´À ÇĞ±³ÀÇ ±ÛÀ» ¹Ş¾Æ¿ÃÁö ¼³Á¤ÇÕ´Ï´Ù.
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸. ì–´ëŠ í•™êµì˜ ê¸€ì„ ë°›ì•„ì˜¬ì§€ ì„¤ì •í•©ë‹ˆë‹¤.
 	 * 
 	 */
 	private void getSimpleArticles(int univKey,String dateString){
 		ArrayList<Article> articles = new ArrayList<Article>();
 		String criteriorDateString = dateString;	
-		System.out.println("±âÁØ Å©·Ñ¸µ ½Ã°¢ : " + criteriorDateString);
+		System.out.println("ê¸°ì¤€ í¬ë¡¤ë§ ì‹œê° : " + criteriorDateString);
 		Connection<Post> feed = 
 				fbClient.fetchConnection(Constants.univs[univKey].getUrl() + "/posts", Post.class,
 						Parameter.with("limit", 100), Parameter.with("fields", "id,created_time"));
-					//	¿©±â¿¡¼­ ¹Ù·Î since Parameter·Î Àû¿ëÇÒ¼öµµÀÖÀ»±î?
+					//	ì—¬ê¸°ì—ì„œ ë°”ë¡œ since Parameterë¡œ ì ìš©í• ìˆ˜ë„ìˆì„ê¹Œ?
 		int numberOfFinished=0;
 		pLoop:
 		for (List<Post> myFeedConnectionPage : feed){
-			System.out.println("ÇöÀç »õ ±Û " + numberOfFinished + "°³ ¹Ş¾Æ¿È..."); // (¾à) 100°³ ´ÜÀ§·Î Ãâ·Â(Á¢±Ù±ÇÇÑ¾ø´Â±Û ´©¶ôµÉ¼öÀÖÀ½.)
+			System.out.println("í˜„ì¬ ìƒˆ ê¸€ " + numberOfFinished + "ê°œ ë°›ì•„ì˜´..."); // (ì•½) 100ê°œ ë‹¨ìœ„ë¡œ ì¶œë ¥(ì ‘ê·¼ê¶Œí•œì—†ëŠ”ê¸€ ëˆ„ë½ë ìˆ˜ìˆìŒ.)
 			for (Post post : myFeedConnectionPage){
 				if (post != null){			
 					Date creteriorDate = null;
@@ -218,27 +223,28 @@ public class Soop {
 					} catch (ParseException e) {
 						e.printStackTrace();
 					}
-					if (numberOfFinished == this.limit || // µ¿ÀÛ ÀÌ»óÀ¸·Î ³Ê¹« ¸¹ÀÌ ¹Ş¾Ò°Å³ª 
-						post.getCreatedTime().compareTo(creteriorDate) == -1){ // if< ÃÖ±Ù ¾÷µ¥ÀÌÆ®º¸´Ù ÀÌÀü¿¡ ¿Ã¶ó¿Â ±ÛÀÌ¸é ±×¸¸ ¹Ş±â.
-						// cret >DBÀĞor±âº»°ª
+					if (numberOfFinished == this.limit || // ë™ì‘ ì´ìƒìœ¼ë¡œ ë„ˆë¬´ ë§ì´ ë°›ì•˜ê±°ë‚˜ 
+						post.getCreatedTime().compareTo(creteriorDate) == -1){ // if< ìµœê·¼ ì—…ë°ì´íŠ¸ë³´ë‹¤ ì´ì „ì— ì˜¬ë¼ì˜¨ ê¸€ì´ë©´ ê·¸ë§Œ ë°›ê¸°.
+						// cret >DBì½orê¸°ë³¸ê°’
 						break pLoop;
 					}
-					else{ // cret <=DBÀĞor±âº»°ª
-						articles.add(new Article(post.getId(),Constants.fm.format(post.getCreatedTime()),univKey));
+					else{ // cret <=DBì½orê¸°ë³¸ê°’
+						System.out.println(Constants.fm2.format(post.getCreatedTime()));
+						articles.add(new Article(post.getId(),Constants.fm2.format(post.getCreatedTime()),univKey));
 						numberOfFinished++;
 						
 					}
 				}
 			}
 		}
-		System.out.println("»õ ±Û ÃÑ " + numberOfFinished + "°³ ¹Ş¾Æ¿È!");
-		System.out.println("¹Ş¾Æ¿Â ÀÚ·á¸¦ DB¿¡ Àü¼ÛÇÏ´ÂÁß...");
-		db.writeSimpleInformations(articles); // ±âº»Á¤º¸µéÀ» DB¿¡ ÀúÀå.
-		db.setRecentUpdate(Constants.fm.format(new Date()),univKey);
-		System.out.println(Constants.univs[univKey].getName() + " »õ ±Û ÃÑ " + numberOfFinished + "°³ Å©·Ñ¸µ ¿Ï·á!");		
+		System.out.println("ìƒˆ ê¸€ ì´ " + numberOfFinished + "ê°œ ë°›ì•„ì˜´!");
+		System.out.println("ë°›ì•„ì˜¨ ìë£Œë¥¼ DBì— ì „ì†¡í•˜ëŠ”ì¤‘...");
+		db.writeSimpleInformations(articles); // ê¸°ë³¸ì •ë³´ë“¤ì„ DBì— ì €ì¥.
+		db.setRecentUpdate(univKey);
+		System.out.println(Constants.univs[univKey].getName() + " ìƒˆ ê¸€ ì´ " + numberOfFinished + "ê°œ í¬ë¡¤ë§ ì™„ë£Œ!");		
 				
 		
-		System.out.println("»õ ±Û DBÀü¼Û ¿Ï·á½Ã°¢ : "+Constants.fm.format(new Date()));
+		System.out.println("ìƒˆ ê¸€ DBì „ì†¡ ì™„ë£Œì‹œê° : "+Constants.fm.format(new Date()));
 		System.out.println("------------------------------------------");
 	}
 
@@ -248,44 +254,70 @@ public class Soop {
 
 
 	/**
-	 * DB¿¡ ÀúÀåµÈ ¸ğµç °Ô½Ã±Û Áß ÁöÁ¤ÇÑ ÇĞ±³¿¡ ÇØ´çÇÏ´Â °Ô½Ã±ÛÀÇ ÁÁ¾Æ¿ä, ´ñ±Û, °øÀ¯ È½¼ö¸¦ ¾÷µ¥ÀÌÆ®ÇÕ´Ï´Ù.
-	 * <p>db¿¡¼­ id¸¸ »©¿Í¼­ graph apiµ¹·Á¼­ ÁÁ,´ñ,°ø ¹Ş¾Æ¼­ db¿¡ update.
+	 * DBì— ì €ì¥ëœ ëª¨ë“  ê²Œì‹œê¸€ ì¤‘ ì§€ì •í•œ í•™êµì— í•´ë‹¹í•˜ëŠ” ê²Œì‹œê¸€ì˜ ì¢‹ì•„ìš”, ëŒ“ê¸€, ê³µìœ  íšŸìˆ˜ë¥¼ ì—…ë°ì´íŠ¸í•©ë‹ˆë‹¤.
+	 * <p>dbì—ì„œ idë§Œ ë¹¼ì™€ì„œ graph apiëŒë ¤ì„œ ì¢‹,ëŒ“,ê³µ ë°›ì•„ì„œ dbì— update.
 	 * @param univKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£. 
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸. 
 	 */
 	private void getInterestInformations(int univKey){	
 		ArrayList<Article> articles = new ArrayList<Article>();		
-		System.out.println(Constants.univs[univKey].getName()+" ÁÁ¾Æ¿ä, ´ñ±Û, °øÀ¯ ¼ö ¾÷µ¥ÀÌÆ® ½ÃÀÛ..");
+		System.out.println(Constants.univs[univKey].getName()+" ì¢‹ì•„ìš”, ëŒ“ê¸€, ê³µìœ  ìˆ˜ ì—…ë°ì´íŠ¸ ì‹œì‘..");
 		ArrayList<String> ids = db.readIds(univKey,"articles");
 		int numberOfFinished=0;		
 		int sizeOfList = ids.size();
 		int quotient = (int) ( (sizeOfList-1) / 50)+1; 
 //		System.out.println(quotient);
 		for(int i=0; i<quotient; i++){
-			System.out.println("ÇöÀç " + numberOfFinished + "°³ ¹Ş¾Æ¿È..."); //			
-			List<String> subIds = // 50°³ ¾¿ ³ª´²¼­ ¿äÃ»ÇØ¾ß ÇÔ.
+			System.out.println("í˜„ì¬ " + numberOfFinished + "ê°œ ë°›ì•„ì˜´..."); //			
+			List<String> subIds = // 50ê°œ ì”© ë‚˜ëˆ ì„œ ìš”ì²­í•´ì•¼ í•¨.
 					ids.subList(	i*50,	Math.min(i*50+50,sizeOfList)	);
 			JsonObject obj=null;
 			try{
 			obj =  fbClient.fetchObjects(subIds,
 					JsonObject.class,
-					Parameter.with("fields", "reactions.summary(true).limit(0),comments.limit(0).summary(true),shares.limit(0).summary(true)"));
+					Parameter.with("fields", "reactions.summary(true).limit(0),comments.limit(0).summary(true),shares.limit(0).summary(true),attachments"));
 			}
 			catch(Exception e){
-				System.err.println("ÀÌ»ó¹ß»ı! ¾Æ¸¶ ¸ÁÇÑÆäÀÌÁö°°´Ù!");
+				System.err.println("ì´ìƒë°œìƒ! ì•„ë§ˆ ë§í•œí˜ì´ì§€ê°™ë‹¤!");
 			}
 			for(String id: subIds){
 				try{
 					int likes = obj.getJsonObject(id).getJsonObject("reactions").getJsonObject("summary").getInt("total_count"); //reaction emotion haha sad happy...
 					int comments = obj.getJsonObject(id).getJsonObject("comments").getJsonObject("summary").getInt("total_count");
 					int shares = 0;
+					JsonArray jaPictures = new JsonArray();
 					
+					if(obj.getJsonObject(id).has("attachments")){
+						JsonObject tempObj = obj.getJsonObject(id).getJsonObject("attachments").getJsonArray("data").getJsonObject(0);
+						
+						if (tempObj.has("subattachments")){
+							JsonArray pictureData =  tempObj.getJsonObject("subattachments").getJsonArray("data");
+							int size = pictureData.length();
+							System.out.println(size);
+							for (int it=0; it<size; it++){
+								jaPictures.put(
+									pictureData.getJsonObject(it).getJsonObject("media").getJsonObject("image").getString("src")
+								);
+							}	
+						}
+						else if (tempObj.has("media")){
+							jaPictures.put(tempObj.getJsonObject("media").getJsonObject("image").getString("src"));
+						}
+					}
+										
+					String pictures = jaPictures.toString();
+					System.out.println(pictures);
 					if (obj.getJsonObject(id).has("shares"))
 						shares = obj.getJsonObject(id).getJsonObject("shares").getInt("count");
-					articles.add(new Article(id,likes,comments,shares));
+					articles.add(new Article(id,likes,comments,shares,pictures)); 
+					
+					//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+					
+					
 					numberOfFinished++;				
 				}catch(Exception e){ 
-					System.err.println("ÀÌ»óÇÑ³ğ ¹ß°ßÇß´Ù!");
+//					e.printStackTrace();
+					System.err.println("ì´ìƒí•œë†ˆ ë°œê²¬í–ˆë‹¤!");
 					System.err.println(id); 
 					
 				}
@@ -293,9 +325,9 @@ public class Soop {
 			}
 			
 		}		
-		System.out.println("¹Ş¾Æ¿Â ÀÚ·á¸¦ DB¿¡ Àü¼ÛÇÏ´ÂÁß...");
+		System.out.println("ë°›ì•„ì˜¨ ìë£Œë¥¼ DBì— ì „ì†¡í•˜ëŠ”ì¤‘...");
 		db.writeInterestInformations(articles);
-		System.out.println(Constants.univs[univKey].getName()+" ÁÁ¾Æ¿ä, ´ñ±Û, °øÀ¯ ¼ö °¢°¢ "+ids.size() +"°³ ¾÷µ¥ÀÌÆ® ¿Ï·á!");
+		System.out.println(Constants.univs[univKey].getName()+" ì¢‹ì•„ìš”, ëŒ“ê¸€, ê³µìœ  ìˆ˜ ê°ê° "+ids.size() +"ê°œ ì—…ë°ì´íŠ¸ ì™„ë£Œ!");
 		System.out.println("------------------------------------------");
 	}
 
@@ -304,36 +336,36 @@ public class Soop {
 	
 	
 	/**
-	 * DBÀÇ 'filteredArticles'Å×ÀÌºí¿¡ ÇöÀç ÇĞ±³ÀÇ Èï¹Ì·Î¿î ±ÛµéÀ» Ãß°¡ÇÕ´Ï´Ù.
-	 * <p> db·ÎºÎÅÍ ÇĞ±³º° »óÀ§±ÛµéÀ» Ãß·Á articles·Î ¹Ş¾Æ¿À°í 
-	 * Áö±İ¿¡¼­¾ß graph api ÅëÇØ message ¹Ş¾Æ¼­  
-	 * ¹æ±İ¹ŞÀº articlesÀÇ messageÇÊµå¸¦ Ã¤¿öÁÖ°í
-	 * interestingArticles Å×ÀÌºí¿¡ insert. 
+	 * DBì˜ 'filteredArticles'í…Œì´ë¸”ì— í˜„ì¬ í•™êµì˜ í¥ë¯¸ë¡œìš´ ê¸€ë“¤ì„ ì¶”ê°€í•©ë‹ˆë‹¤.
+	 * <p> dbë¡œë¶€í„° í•™êµë³„ ìƒìœ„ê¸€ë“¤ì„ ì¶”ë ¤ articlesë¡œ ë°›ì•„ì˜¤ê³  
+	 * ì§€ê¸ˆì—ì„œì•¼ graph api í†µí•´ message ë°›ì•„ì„œ  
+	 * ë°©ê¸ˆë°›ì€ articlesì˜ messageí•„ë“œë¥¼ ì±„ì›Œì£¼ê³ 
+	 * interestingArticles í…Œì´ë¸”ì— insert. 
 	 *  
 	 * @param UnivKey
-	 * 		´ë»ó ÇĞ±³¹øÈ£.
+	 * 		ëŒ€ìƒ í•™êµë²ˆí˜¸.
 	 */
 	private void addInterestingArticles(int univKey,int limitNumber){
-//		System.out.println("Èï¹Ì·Î¿î »óÀ§ "+limitNumber +"°³ÀÇ µ¥ÀÌÅÍ¸¦ Ãß·Á ¹Ş¾Æ¿À´ÂÁß...");
-		System.out.println("Èï¹Ì·Î¿î ±Û µ¥ÀÌÅÍ¸¦ Ãß·Á ¹Ş¾Æ¿À´ÂÁß...");
-		//ÆäÀÌÁö ±¸µ¶¼ö ¹Ş¾Æ¿À±â
-//		ArrayList<Article> articles = db.fetchInterestingArticles(univKey, limitNumber);//db¿¡¼­ (Á¶°Ç¸¸Á·ÇÏ´Â) ÇØ´çÇĞ±³ÀÇ »óÀ§ n°³ »Ì¾Æ¿È.
-		ArrayList<Article> articles = db.fetchInterestingArticles(univKey);//db¿¡¼­ (Á¶°Ç¸¸Á·ÇÏ°í) ¾ÆÁ÷ Ãß°¡¾ÈµÈ ÇØ´çÇĞ±³ÀÇ ±Û ¸ğµÎ »Ì¾Æ¿È.
+//		System.out.println("í¥ë¯¸ë¡œìš´ ìƒìœ„ "+limitNumber +"ê°œì˜ ë°ì´í„°ë¥¼ ì¶”ë ¤ ë°›ì•„ì˜¤ëŠ”ì¤‘...");
+		System.out.println("í¥ë¯¸ë¡œìš´ ê¸€ ë°ì´í„°ë¥¼ ì¶”ë ¤ ë°›ì•„ì˜¤ëŠ”ì¤‘...");
+		//í˜ì´ì§€ êµ¬ë…ìˆ˜ ë°›ì•„ì˜¤ê¸°
+//		ArrayList<Article> articles = db.fetchInterestingArticles(univKey, limitNumber);//dbì—ì„œ (ì¡°ê±´ë§Œì¡±í•˜ëŠ”) í•´ë‹¹í•™êµì˜ ìƒìœ„ nê°œ ë½‘ì•„ì˜´.
+		ArrayList<Article> articles = db.fetchInterestingArticles(univKey);//dbì—ì„œ (ì¡°ê±´ë§Œì¡±í•˜ê³ ) ì•„ì§ ì¶”ê°€ì•ˆëœ í•´ë‹¹í•™êµì˜ ê¸€ ëª¨ë‘ ë½‘ì•„ì˜´.
 		
 		
 		
 		
-		int numberOfFinished=0;		
+//		int numberOfFinished=0;		
 		int sizeOfList = articles.size();
 		int quotient = (int) ( (sizeOfList-1) / 50)+1; 
 //		System.out.println(quotient);
 		for(int i=0; i<quotient; i++){
 		
-			List<Article> subArticles = // 50°³ ¾¿ ³ª´²¼­ ¿äÃ»ÇØ¾ß ÇÔ.
+			List<Article> subArticles = // 50ê°œ ì”© ë‚˜ëˆ ì„œ ìš”ì²­í•´ì•¼ í•¨.
 					articles.subList(	i*50,	Math.min(i*50+50,sizeOfList)	);
 			List<String> subIds = new ArrayList<String>();		
 			for(Article article : subArticles){
-				subIds.add(article.getId()); //id¸¸ »Ì¾Æ¼­ ¿äÃ»ÇÏ´Âµ¥ ¾µ °ÍÀÓ.
+				subIds.add(article.getId()); //idë§Œ ë½‘ì•„ì„œ ìš”ì²­í•˜ëŠ”ë° ì“¸ ê²ƒì„.
 			}
 			
 			JsonObject obj = null;
@@ -343,28 +375,28 @@ public class Soop {
 						Parameter.with("fields", "message"));
 			}
 			catch(IllegalArgumentException e){
-				System.err.println("ºó ¸®½ºÆ® ¿À·ù¹ß»ı!");
+				System.err.println("ë¹ˆ ë¦¬ìŠ¤íŠ¸ ì˜¤ë¥˜ë°œìƒ!");
 				
 			}
 			for(String id: subIds){
 				try{ 
 					String message = obj.getJsonObject(id).getString("message");
 					for(Article article : articles){					
-						if(article.getId()==id){
+						if(article.getId().equals(id)){
 							article.setMessage(message);
 						}
 						
 					}
 				}catch(Exception e){ 
-					System.err.println("¸Ş½ÃÁö°¡ ¾ø´Â ±ÛÀÔ´Ï´Ù.");
+					System.err.println("ë©”ì‹œì§€ê°€ ì—†ëŠ” ê¸€ì…ë‹ˆë‹¤.");
 					System.err.println(id);
 				}
 			}
 		}	
 
-		System.out.println("¹Ş¾Æ¿Â ÀÚ·á¸¦ DB¿¡ Àü¼ÛÇÏ´ÂÁß...");
+		System.out.println("ë°›ì•„ì˜¨ ìë£Œë¥¼ DBì— ì „ì†¡í•˜ëŠ”ì¤‘...");
 		db.writeInterestingArticles(articles);
-		System.out.println(Constants.univs[univKey].getName()+" Èï¹Ì·Î¿î ÀÚ·á ¾÷·Îµå ¿Ï·á.");
+		System.out.println(Constants.univs[univKey].getName()+" í¥ë¯¸ë¡œìš´ ìë£Œ ì—…ë¡œë“œ ì™„ë£Œ.");
 		
 	}
 	
@@ -429,9 +461,9 @@ public class Soop {
 	
 	
 	/**
-	 * °Á Å×½ºÆ®¿ëÀÔ´Ï´ç. id¹Ş¾Æ¼­ ³»¿ë º¸°í½ÍÀ»¶§ ½á¹Ù¿µ¤¾¤¾ 
+	 * ê± í…ŒìŠ¤íŠ¸ìš©ì…ë‹ˆë‹¹. idë°›ì•„ì„œ ë‚´ìš© ë³´ê³ ì‹¶ì„ë•Œ ì¨ë°”ì˜ã…ã… 
 	 * @param id
-	 * 		°Ô½Ã±Û id.
+	 * 		ê²Œì‹œê¸€ id.
 	 */
 	public void printArticle(String id){
 
